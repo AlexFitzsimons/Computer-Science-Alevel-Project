@@ -144,43 +144,44 @@ class Switch:
 
 ###the class that defines the number input box
 
-defaultDensity = 1
-defaultTimeinterval = 160000/FPS
+defaultTimeinterval = 10000/FPS
 centerX = width/3
 centerY = height/3
 ###the class that defines the objects in the simulation
 class Object():
-    def __init__(self, ID, colour, radius, posX, posY, velX, velY):
+    def __init__(self, ID, colour, radius, posX, posY, velX, velY, density):
+
         self.ID = ID
         self.colour = colour
         self.drawRadius = radius
-        self.drawPosX = posX+centerX
-        self.drawPosY = posY+centerY
+        self.drawPosX = posX
+        self.drawPosY = posY
         self.velX = velX
         self.velY = velY
         self.netX = 0
         self.netY = 0
+        self.density = density
         self.metricPosX = metersPerPixel*self.drawPosX
         self.metricPosY = metersPerPixel*self.drawPosY
         self.metricRadius = metersPerPixel*self.drawRadius
-        self.metricMass = math.pi*(4/3)*(self.metricRadius**3)*defaultDensity
+        self.metricMass = math.pi*(4/3)*(self.metricRadius**3)*self.density
 
 
     def displayObject(self):
-        pygame.draw.circle(display, self.colour, (round(self.drawPosX), round(self.drawPosY)), round(self.drawRadius))
+        pygame.draw.circle(display, self.colour, (round(self.drawPosX+centerX), round(self.drawPosY+centerY)), round(self.drawRadius))
 
     def showID(self):
         ObjectText = ObjectFont.render(str(self.ID), 1, red)
-        display.blit(ObjectText, (self.drawPosX-5, self.drawPosY-5))
+        display.blit(ObjectText, (self.drawPosX-5+centerX, self.drawPosY-5+centerY))
 
     def updateUnits(self):
-        self.metricRadius = ((3*self.metricMass)/(4*math.pi*defaultDensity))**(1/3)
+        self.metricRadius = ((3*self.metricMass)/(4*math.pi*self.density))**(1/3)
         self.drawRadius = self.metricRadius/metersPerPixel
         self.drawPosX = self.metricPosX/metersPerPixel
         self.drawPosY = self.metricPosY/metersPerPixel
     
     def showSelected(self):
-        pygame.draw.circle(display, orange, (int(round(self.drawPosX)), int(round(self.drawPosY))), int(round(self.drawRadius)), 3)
+        pygame.draw.circle(display, orange, (int(round(self.drawPosX+centerX)), int(round(self.drawPosY+centerY))), int(round(self.drawRadius)), 3)
 
     def changePos(self):
         self.metricPosX += (self.velX*defaultTimeinterval)
@@ -200,15 +201,15 @@ class Object():
                 self.velY = -self.velY
 
 class ImageObject():
-    def __init__(self, ID, type, posX, posY, velX, velY):
+    def __init__(self, ID, type, posX, posY, velX, velY, density):
         self.ID = ID
-
         self.drawPosX = posX+centerX
         self.drawPosY = posY+centerY
         self.velX = velX
         self.velY = velY
         self.netX = 0
         self.netY = 0
+        self.density = density
         self.metricPosX = metersPerPixel*PosX
         self.metricPosY = metersPerPixel*PosY
         self.type = type
@@ -222,7 +223,7 @@ class ImageObject():
                 self.image = AsEarth
             self.metricRadius = 6371000
         self.drawRadius = self.metricRadius/metersPerPixel
-        self.metricMass = math.pi*(4/3)*(self.metricRadius**3)*defaultDensity
+        self.metricMass = math.pi*(4/3)*(self.metricRadius**3)*self.density
 
 
     def displayObject(self):
@@ -234,7 +235,7 @@ class ImageObject():
         display.blit(ObjectText, (self.drawPosX-5, self.drawPosY-5))
 
     def updateUnits(self):
-        self.metricRadius = ((3*self.metricMass)/(4*math.pi*defaultDensity))**(1/3)
+        self.metricRadius = ((3*self.metricMass)/(4*math.pi*self.density))**(1/3)
         self.drawRadius = self.metricRadius/metersPerPixel
         self.drawPosX = (self.metricPosX/metersPerPixel)+centerX
         self.drawPosY = (self.metricPosY/metersPerPixel)+centerY
@@ -269,7 +270,8 @@ def exiting(exit):
 ###GUIs
 
 ##panels
-pTools = Panel("Tools", grey2, 5, 34, int(width/8), height-44)
+pTools = Panel("Tools", grey2, 5, 34, int(width/8), int(height/2))
+pInfo = Panel("Info", grey2, 5, 36+int(height/2), int(width/8), int(height/2)-46)
 pSimulation = Panel("Simulation", black, int((width/8)+7), 34, int(width/2), 4*height/5+40)
 pTime = Panel("Time", grey2, int((width/8)+7), height-11, int(width/2), -152)
 pTopGraph = Panel("Graph 1", white, width-6, 34, -704, height/2)
@@ -329,7 +331,10 @@ while True:
     objects = []
     paused = False
     state = True
+
+    newDensity = 5500
     newRadius = 10
+    
     wasClicked = False
     clicked = False
     rightClicked = False
@@ -347,7 +352,7 @@ while True:
     fileNames = os.listdir("saves\\")
     fileNames.remove("NumberOfSaves.txt")
     for count, filename in enumerate(fileNames):
-        buttons.append(Button(filename, grey2, (width/2)-150, (count*60)+40, 300, 50))
+        buttons.append(Button(filename, grey2, (width/2)-350, (count*60)+40, 300, 50))
     while inMainMenu:
         display.fill(grey1)
         X = list(pygame.mouse.get_pos())[0]#gets x coordinate of mouse
@@ -388,35 +393,59 @@ while True:
     time.sleep(0.5)
     
     for item in data:
-        metricradius = (((3*item[1])/(4*math.pi*defaultDensity))**(1/3))
+        metricradius = (((3*item[1])/(4*math.pi*item.density))**(1/3))
         Radius = metricradius/metersPerPixel
-        objects.append(Object(item[0], grey1, Radius, (item[2]/metersPerPixel)-centerX, (item[3]/metersPerPixel)-centerY, item[4], item[5]))
-    print(objects)
+        objects.append(Object(item[0], grey1, Radius, (item[2]/metersPerPixel)-centerX, (item[3]/metersPerPixel)-centerY, item[4], item[5], 1))
+    
     ##simulation
-
+    zoom = False
+    changeDensity = False
     while not inMainMenu:
         ##inputs
         X = list(pygame.mouse.get_pos())[0]#gets x coordinate of mouse
         Y = list(pygame.mouse.get_pos())[1]#gets y coordinate of mouse
         for event in pygame.event.get():
-            if (event.type == pygame.MOUSEBUTTONDOWN):
-                if event.button == 5:
-                    if newRadius <= 150:
-                        newRadius *= 1.05
-                if event.button == 4:
-                    if newRadius >= 3:
-                        newRadius /= 1.05
-            else:
-                if event.type == quit:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
-                    if event.key == pygame.K_SPACE:
-                        paused = not paused
-                        sPausePlay.state = not sPausePlay.state
+                if event.key == pygame.K_SPACE:
+                    paused = not paused
+                    sPausePlay.state = not sPausePlay.state
+            elif (event.type == pygame.MOUSEBUTTONDOWN):
+                if event.button == 5:
+                    if not changeDensity:
+                        if zoom:
+                            metersPerPixel /= 1.05
+                        if newRadius <= 150:
+                            newRadius *= 1.05
+                    else:
+                        newDensity *= 1.001
+                if event.button == 4:
+                    if not changeDensity:
+                        if zoom:
+                            metersPerPixel *= 1.01
+                        if newRadius >= 3:
+                            newRadius /= 1.05
+                    else:
+                        newDensity /= 1.001
+            
+            elif event.type == quit:
+                pygame.quit()
+                sys.exit()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LSHIFT] and keys[pygame.K_z]:
+            zoom = True
+            changeDensity = False
+            centerX = X
+            centerY = Y
+        elif  keys[pygame.K_LSHIFT] and keys[pygame.K_d]:
+            changeDensity = True
+            zoom = False
+        else:
+            zoom = False
+            changeDensity = False
         clicked = list(pygame.mouse.get_pressed())[0]
         rightClicked = list(pygame.mouse.get_pressed())[2]
 
@@ -451,37 +480,43 @@ while True:
                         momentumY = self.velY*self.metricMass + other.velY*other.metricMass
 
                         if distance <= (self.metricRadius + other.metricRadius):
+                            combinedDensity = (self.density+other.density)/2
                             if self.metricRadius > other.metricRadius:
+                                print(self.density, other.density)
                                 self.metricMass += other.metricMass
                                 objects.remove(other)
+                                self.density = combinedDensity
                                 self.velX = momentumX/self.metricMass
                                 self.velY = momentumY/self.metricMass
                                 self.updateUnits()
+                                print(self.density)
                             else:
+                                print(self.density, other.density)
                                 other.metricMass += self.metricMass
                                 objects.remove(self)
+                                other.density = combinedDensity
                                 other.velX = momentumX/other.metricMass
                                 other.velY = momentumY/other.metricMass
                                 other.updateUnits()
-
+                                print(other.density)
         
         for self in objects:
             if not paused:
                 self.changePos()
-            
+            self.updateUnits()
             self.displayObject()
             self.bounce(leftEdge, topEdge, rightEdge, lowerEdge, sBounce.state)
             if sShowVel.state:
-                pygame.draw.line(display, magenta, (self.drawPosX, self.drawPosY), (self.drawPosX+(self.velX/10),self.drawPosY+(self.velY/10)), 3)
+                pygame.draw.line(display, magenta, (int(self.drawPosX+centerX), int(self.drawPosY+centerY)), (int(self.drawPosX+(self.velX/10)+centerX), int(self.drawPosY+(self.velY/10)+centerY)))
             if sShowFor.state:
-                pygame.draw.line(display, cyan, (self.drawPosX, self.drawPosY), (int(self.drawPosX-(self.netX/(10**15))), int(self.drawPosY-(self.netY/(10**15)))), 3)
+                pygame.draw.line(display, cyan, (self.drawPosX, self.drawPosY), (int(self.drawPosX-(self.netX/100000000))), int(self.drawPosY-(self.netY/100000000)))
             if sShowID.state:
                 self.showID()
             self.netX = 0
-            self.netY = 6
+            self.netY = 0
 
         if (X-newRadius>leftEdge) and (X+newRadius<rightEdge) and (Y-newRadius>topEdge) and (Y+newRadius<lowerEdge):
-            pygame.draw.circle(display, blue, (X,Y), int(newRadius), 3)
+            pygame.draw.circle(display, blue, (X,Y), int(newRadius), 2)
             if clicked and not ClickedLastFrame:
                 ClickedLastFrame = True
                 initialY = Y-0
@@ -490,11 +525,11 @@ while True:
                 ClickedLastFrame = True
                 pygame.draw.circle(display, grey1, (initialX, initialY), int(newRadius))
                 pygame.draw.line(display, green, (initialX, initialY), (X, Y), 3)
-                pygame.draw.circle(display, yellow, (X, Y), int(newRadius), 3)
+                pygame.draw.circle(display, yellow, (X, Y), int(newRadius), 2)
             elif not clicked and ClickedLastFrame:
                 ClickedLastFrame = False
                 if newRadius < 150 and newRadius > 3:
-                    objects.append(Object(number, grey1, int(newRadius), initialX-centerX, initialY-centerY, (initialX-X), (initialY-Y)))
+                    objects.append(Object(number, grey1, int(newRadius), initialX-centerX, initialY-centerY, (initialX-X), (initialY-Y), newDensity))
                     number += 1
             elif not clicked and not ClickedLastFrame:
                 ClickedLastFrame = False
@@ -507,7 +542,7 @@ while True:
                 rightClickedLastFrame = True
                 pygame.draw.circle(display, grey1, (initialX, initialY), int(newRadius))
                 pygame.draw.line(display, green, (initialX, initialY), (X, Y), 3)
-                pygame.draw.circle(display, yellow, (X, Y), int(newRadius), 3)
+                pygame.draw.circle(display, yellow, (X, Y), int(newRadius), 2)
             elif not rightClicked and rightClickedLastFrame:
                 rightClickedLastFrame = False
                 if newRadius < 150 and newRadius > 3:
@@ -520,7 +555,8 @@ while True:
 
         background()
 
-        pTools.displayPanel()
+        pTools.displayPanel()        
+        pInfo.displayPanel()
         pTime.displayPanel()
         pTopGraph.displayPanel()
 
@@ -535,6 +571,16 @@ while True:
 
         paused = sPausePlay.state
 
+            
+        radiusLabel = PanelFont.render("Current Radius:", 1, black)
+        radiusInfo = PanelFont.render("  " + str(int(metersPerPixel*newRadius)) + "m", 1, black)
+        densityLabel = PanelFont.render("Current Density:", 1, black)
+        densityInfo = PanelFont.render("  " + str(int(newDensity))+"Kg/m^3", 1, black)
+        
+        display.blit(radiusLabel, (8, 50+int(height/2)))
+        display.blit(radiusInfo, (8, 70+int(height/2)))
+        display.blit(densityLabel, (8, 90+int(height/2)))
+        display.blit(densityInfo, (8, 110+int(height/2)))
 
 
         colour5, bResetClicked = bReset.buttonClicked(clicked, X, Y) 
@@ -542,6 +588,8 @@ while True:
         if bResetClicked:
             objects = []
             number = 0
+            newDensity = 5500
+            newRadius = 10
         
         colour6, bIncreaseClicked = bIncrease.buttonClicked(clicked, X, Y)
         bIncrease.displayButton(colour6)
@@ -620,6 +668,9 @@ while True:
                     inMainMenu = True
                     objects = []
                     number = 0
+                else:
+                    promptText = PanelFont.render("Do you want to save this siulation?", 1, grey1)
+                    display.blit(promptText, (width/2-100, height/2))
                 pygame.display.update()
                 FPSClock.tick(FPS)
             time.sleep(2)
