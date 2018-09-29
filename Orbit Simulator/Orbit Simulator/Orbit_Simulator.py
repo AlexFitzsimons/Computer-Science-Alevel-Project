@@ -344,7 +344,7 @@ while True:
     fileNames = []
     buttons = []
     data = []
-    fileNames = os.listdir("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\")
+    fileNames = os.listdir("saves\\")
     fileNames.remove("NumberOfSaves.txt")
     for count, filename in enumerate(fileNames):
         buttons.append(Button(filename, grey2, (width/2)-150, (count*60)+40, 300, 50))
@@ -378,7 +378,7 @@ while True:
                 colour12, buttonClicked = item.buttonClicked(clicked, X, Y)
                 item.displayButton(colour12)
                 if buttonClicked:
-                    file = open("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\" + item.name, "r")
+                    file = open("saves\\" + item.name, "r")
                     data = eval(file.readline())
 
                     inMainMenu = False
@@ -602,13 +602,13 @@ while True:
                 elif bSaveClicked:
                     
                     done = True
-                    file = open("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\NumberOfSaves.txt", "r")
+                    file = open("saves\\NumberOfSaves.txt", "r")
                     FileID = str(int(file.readline())+1)
                     FileName = "simulation" + FileID
-                    file = open("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\NumberOfSaves.txt", "w")
+                    file = open("saves\\NumberOfSaves.txt", "w")
                     file.write(FileID)
                     file.close()
-                    file = open("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\"+FileName+".txt", "w")
+                    file = open("saves\\"+FileName+".txt", "w")
                     data = []
                     for item in objects:
                         data.append([item.ID, item.metricMass, item.metricPosX, item.metricPosY, item.velX, item.velY])
