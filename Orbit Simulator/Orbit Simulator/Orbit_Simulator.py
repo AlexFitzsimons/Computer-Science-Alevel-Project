@@ -154,8 +154,8 @@ class Object():
         self.ID = ID
         self.colour = colour
         self.drawRadius = radius
-        self.drawPosX = posX
-        self.drawPosY = posY
+        self.drawPosX = posX+centerX
+        self.drawPosY = posY+centerY
         self.velX = velX
         self.velY = velY
         self.netX = 0
@@ -167,11 +167,11 @@ class Object():
 
 
     def displayObject(self):
-        pygame.draw.circle(display, self.colour, (round(self.drawPosX+centerX), round(self.drawPosY+centerY)), round(self.drawRadius))
+        pygame.draw.circle(display, self.colour, (round(self.drawPosX), round(self.drawPosY)), round(self.drawRadius))
 
     def showID(self):
         ObjectText = ObjectFont.render(str(self.ID), 1, red)
-        display.blit(ObjectText, (self.drawPosX-5+centerX, self.drawPosY-5+centerY))
+        display.blit(ObjectText, (self.drawPosX-5, self.drawPosY-5))
 
     def updateUnits(self):
         self.metricRadius = ((3*self.metricMass)/(4*math.pi*defaultDensity))**(1/3)
@@ -180,7 +180,7 @@ class Object():
         self.drawPosY = self.metricPosY/metersPerPixel
     
     def showSelected(self):
-        pygame.draw.circle(display, orange, (int(round(self.drawPosX+centerX)), int(round(self.drawPosY+centerY))), int(round(self.drawRadius)), 3)
+        pygame.draw.circle(display, orange, (int(round(self.drawPosX)), int(round(self.drawPosY))), int(round(self.drawRadius)), 3)
 
     def changePos(self):
         self.metricPosX += (self.velX*defaultTimeinterval)
@@ -344,7 +344,7 @@ while True:
     fileNames = []
     buttons = []
     data = []
-    fileNames = os.listdir("saves\\")
+    fileNames = os.listdir("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\")
     fileNames.remove("NumberOfSaves.txt")
     for count, filename in enumerate(fileNames):
         buttons.append(Button(filename, grey2, (width/2)-150, (count*60)+40, 300, 50))
@@ -378,7 +378,7 @@ while True:
                 colour12, buttonClicked = item.buttonClicked(clicked, X, Y)
                 item.displayButton(colour12)
                 if buttonClicked:
-                    file = open("saves\\" + item.name, "r")
+                    file = open("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\" + item.name, "r")
                     data = eval(file.readline())
 
                     inMainMenu = False
@@ -391,45 +391,32 @@ while True:
         metricradius = (((3*item[1])/(4*math.pi*defaultDensity))**(1/3))
         Radius = metricradius/metersPerPixel
         objects.append(Object(item[0], grey1, Radius, (item[2]/metersPerPixel)-centerX, (item[3]/metersPerPixel)-centerY, item[4], item[5]))
-    
+    print(objects)
     ##simulation
-    shift = False
+
     while not inMainMenu:
         ##inputs
         X = list(pygame.mouse.get_pos())[0]#gets x coordinate of mouse
         Y = list(pygame.mouse.get_pos())[1]#gets y coordinate of mouse
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-                if event.key == pygame.K_SPACE:
-                    paused = not paused
-                    sPausePlay.state = not sPausePlay.state
-            elif (event.type == pygame.MOUSEBUTTONDOWN):
+            if (event.type == pygame.MOUSEBUTTONDOWN):
                 if event.button == 5:
-                    if shift:
-                        metersPerPixel /= 1.05
                     if newRadius <= 150:
                         newRadius *= 1.05
                 if event.button == 4:
-                    if shift:
-                        metersPerPixel *= 1.05
                     if newRadius >= 3:
                         newRadius /= 1.05
-            
-            elif event.type == quit:
-                pygame.quit()
-                sys.exit()
-
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LSHIFT]:
-            shift = True
-            centerX = X
-            centerY = Y
-        else:
-            shift = False
-
+            else:
+                if event.type == quit:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                    if event.key == pygame.K_SPACE:
+                        paused = not paused
+                        sPausePlay.state = not sPausePlay.state
         clicked = list(pygame.mouse.get_pressed())[0]
         rightClicked = list(pygame.mouse.get_pressed())[2]
 
@@ -481,13 +468,13 @@ while True:
         for self in objects:
             if not paused:
                 self.changePos()
-            self.updateUnits()
+            
             self.displayObject()
             self.bounce(leftEdge, topEdge, rightEdge, lowerEdge, sBounce.state)
             if sShowVel.state:
-                pygame.draw.line(display, magenta, (int(self.drawPosX+centerX), int(self.drawPos+centerY)), (int(self.drawPosX+(self.velX/10)+centerX), int(self.drawPosY+(self.velY/10)+centerY)))
+                pygame.draw.line(display, magenta, (self.drawPosX, self.drawPosY), (self.drawPosX+(self.velX/10),self.drawPosY+(self.velY/10)), 3)
             if sShowFor.state:
-                pygame.draw.line(display, cyan, (self.drawPosX, self.drawPosY), (int(self.drawPosX-(self.netX/(10**15))), int(self.drawPosY-(self.netY/(10**15)))))
+                pygame.draw.line(display, cyan, (self.drawPosX, self.drawPosY), (int(self.drawPosX-(self.netX/(10**15))), int(self.drawPosY-(self.netY/(10**15)))), 3)
             if sShowID.state:
                 self.showID()
             self.netX = 0
@@ -615,13 +602,13 @@ while True:
                 elif bSaveClicked:
                     
                     done = True
-                    file = open("saves\\NumberOfSaves.txt", "r")
+                    file = open("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\NumberOfSaves.txt", "r")
                     FileID = str(int(file.readline())+1)
                     FileName = "simulation" + FileID
-                    file = open("saves\\NumberOfSaves.txt", "w")
+                    file = open("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\NumberOfSaves.txt", "w")
                     file.write(FileID)
                     file.close()
-                    file = open("saves\\"+FileName+".txt", "w")
+                    file = open("C:\\Users\\alexf\\source\\repos\\Orbit Simulator\\Orbit Simulator\\saves\\"+FileName+".txt", "w")
                     data = []
                     for item in objects:
                         data.append([item.ID, item.metricMass, item.metricPosX, item.metricPosY, item.velX, item.velY])
@@ -633,15 +620,8 @@ while True:
                     inMainMenu = True
                     objects = []
                     number = 0
-                else:
-                    promptText = PanelFont.render("Do you want to save this siulation?", 1, grey1)
-                    display.blit(promptText, (width/2-100, height/2))
                 pygame.display.update()
                 FPSClock.tick(FPS)
             time.sleep(2)
         pygame.display.update()
         FPSClock.tick(FPS)
-
-
-
-
