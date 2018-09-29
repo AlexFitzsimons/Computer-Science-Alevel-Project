@@ -20,6 +20,8 @@ width = ((pygame.display.Info()).current_w)#sets display width to the screen's w
 height = ((pygame.display.Info()).current_h)#sets display height to the screen's height resolution
 display = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
 
+
+
 metersPerPixel = 100000
 
 icon = pygame.image.load('icon.jpg')
@@ -274,8 +276,15 @@ pTools = Panel("Tools", grey2, 5, 34, int(width/8), int(height/2))
 pInfo = Panel("Info", grey2, 5, 36+int(height/2), int(width/8), int(height/2)-46)
 pSimulation = Panel("Simulation", black, int((width/8)+7), 34, int(width/2), 4*height/5+40)
 pTime = Panel("Time", grey2, int((width/8)+7), height-11, int(width/2), -152)
-pTopGraph = Panel("Graph 1", white, width-6, 34, -704, height/2)
+
+topGraph = 34
+leftGraph = int(((5*width)/8)+9)
+rightGraph = int(((5*width)/8)+9)+int(((3*width)/8)-12)
+bottomGraph = int(height/2+34)
+
+pGraph = Panel("Graph 1", white, leftGraph, topGraph, rightGraph-leftGraph, bottomGraph-topGraph)
 pExit = Panel("Exit", grey4, int((width/2)-300), int((height/2)-100), 600, 300)
+pLearn = Panel("Learn", grey2, int(((5*width)/8)+9), (height/2)+36, int(((3*width)/8)-12), (height/2)-46)
 
 ##buttons
 bExit = Button("x", red, width-52, 1, 50, 30)
@@ -558,7 +567,8 @@ while True:
         pTools.displayPanel()        
         pInfo.displayPanel()
         pTime.displayPanel()
-        pTopGraph.displayPanel()
+        pGraph.displayPanel()
+        pLearn.displayPanel()
 
         ##displaying the switches
         for switch in switches:
