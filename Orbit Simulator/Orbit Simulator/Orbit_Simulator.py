@@ -22,14 +22,14 @@ display = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
 
 
 
-metersPerPixel = 100000
+metersPerPixel = 500000
 
 icon = pygame.image.load('icon.jpg')
 pygame.display.set_icon(icon)
 icon = pygame.transform.scale(icon, (30, 30))
-EAEarth = pygame.transform.scale(pygame.image.load('europe-african-Globe.png'), (int(6371000/metersPerPixel), int(6371000/metersPerPixel)))
-AmEarth = pygame.transform.scale(pygame.image.load('American-Globe.png'), (int(6371000/metersPerPixel), int(6371000/metersPerPixel)))
-AsEarth = pygame.transform.scale(pygame.image.load('asian-Globe.png'), (int(6371000/metersPerPixel), int(6371000/metersPerPixel)))
+EAEarth = pygame.transform.scale(pygame.image.load('europe-african-Globe.png'), (int((2*6371000)/metersPerPixel), int((2*6371000)/metersPerPixel)))
+AmEarth = pygame.transform.scale(pygame.image.load('American-Globe.png'), (int((2*6371000)/metersPerPixel), int((2*6371000)/metersPerPixel)))
+AsEarth = pygame.transform.scale(pygame.image.load('asian-Globe.png'), (int((2*6371000)/metersPerPixel), int((2*6371000)/metersPerPixel)))
 
 
 ##setting up the timing
@@ -205,16 +205,17 @@ class Object():
 class ImageObject():
     def __init__(self, ID, type, posX, posY, velX, velY, density):
         self.ID = ID
-        self.drawPosX = posX+centerX
-        self.drawPosY = posY+centerY
+        self.drawPosX = posX
+        self.drawPosY = posY
         self.velX = velX
         self.velY = velY
         self.netX = 0
         self.netY = 0
         self.density = density
-        self.metricPosX = metersPerPixel*PosX
-        self.metricPosY = metersPerPixel*PosY
+        self.metricPosX = metersPerPixel*posX
+        self.metricPosY = metersPerPixel*posY
         self.type = type
+        self.collided = False
         if self.type == "earth":
             OneInThree  =random.randint(1, 3)
             if OneInThree == 1:
@@ -229,28 +230,28 @@ class ImageObject():
 
 
     def displayObject(self):
-        pygame.draw.circle(display, grey1, (self.drawPosX, self.drawPosY), int(self.drawRadius))
-        display.blit(self.image, (self.drawPosX-int((6371000/metersPerPixel)/2), self.drawPosY-int((6371000/metersPerPixel)/2)))
-
+        if self.collided:
+            pygame.draw.circle(display, grey2, (round(self.drawPosX+centerX), round(self.drawPosY+centerY)), round(self.drawRadius))
+        else:
+            display.blit(self.image, (round(self.drawPosX+centerX-self.drawRadius), round(self.drawPosY+centerY-self.drawRadius)))
     def showID(self):
         ObjectText = ObjectFont.render(str(self.ID), 1, red)
-        display.blit(ObjectText, (self.drawPosX-5, self.drawPosY-5))
+        display.blit(ObjectText, (self.drawPosX-5+centerX, self.drawPosY-5+centerY))
 
     def updateUnits(self):
         self.metricRadius = ((3*self.metricMass)/(4*math.pi*self.density))**(1/3)
         self.drawRadius = self.metricRadius/metersPerPixel
-        self.drawPosX = (self.metricPosX/metersPerPixel)+centerX
-        self.drawPosY = (self.metricPosY/metersPerPixel)+centerY
-
+        self.drawPosX = self.metricPosX/metersPerPixel
+        self.drawPosY = self.metricPosY/metersPerPixel
     
     def showSelected(self):
-        pygame.draw.circle(display, orange, (int(round(self.drawPosX)), int(round(self.drawPosY))), int(round(self.drawRadius)), 3)
+        pygame.draw.circle(display, orange, (int(round(self.drawPosX+centerX)), int(round(self.drawPosY+centerY))), int(round(self.drawRadius)), 3)
 
     def changePos(self):
         self.metricPosX += (self.velX*defaultTimeinterval)
         self.metricPosY += (self.velY*defaultTimeinterval)
-        self.drawPosX = (self.metricPosX/metersPerPixel)+centerX
-        self.drawPosY = (self.metricPosY/metersPerPixel)+centerY
+        self.drawPosX = self.metricPosX/metersPerPixel
+        self.drawPosY = self.metricPosY/metersPerPixel
 
     def bounce(self, leftEdge, topEdge, rightEdge, lowerEdge, bounce):     
         if bounce:
@@ -491,23 +492,25 @@ while True:
                         if distance <= (self.metricRadius + other.metricRadius):
                             combinedDensity = (self.density+other.density)/2
                             if self.metricRadius > other.metricRadius:
-                                print(self.density, other.density)
                                 self.metricMass += other.metricMass
                                 objects.remove(other)
                                 self.density = combinedDensity
                                 self.velX = momentumX/self.metricMass
                                 self.velY = momentumY/self.metricMass
-                                self.updateUnits()
-                                print(self.density)
+                                try:
+                                    self.collided = True
+                                except:
+                                    pass
                             else:
-                                print(self.density, other.density)
                                 other.metricMass += self.metricMass
                                 objects.remove(self)
                                 other.density = combinedDensity
                                 other.velX = momentumX/other.metricMass
                                 other.velY = momentumY/other.metricMass
-                                other.updateUnits()
-                                print(other.density)
+                                try:
+                                    other.collided = True
+                                except:
+                                    pass
         
         for self in objects:
             if not paused:
@@ -555,7 +558,7 @@ while True:
             elif not rightClicked and rightClickedLastFrame:
                 rightClickedLastFrame = False
                 if newRadius < 150 and newRadius > 3:
-                    objects.append(ImageObject(number, "earth", X, Y, (initialX-X), (initialY-Y)))
+                    objects.append(ImageObject(number, "earth", initialX-centerX, initialY-centerY, (initialX-X), (initialY-Y), 5500))
                     number += 1
             elif not rightClicked and not rightClickedLastFrame:
                 rightClickedLastFrame = False
