@@ -231,7 +231,7 @@ class ImageObject():
 
     def displayObject(self):
         if self.collided:
-            pygame.draw.circle(display, grey2, (round(self.drawPosX+centerX), round(self.drawPosY+centerY)), round(self.drawRadius))
+            pygame.draw.circle(display, grey1, (round(self.drawPosX+centerX), round(self.drawPosY+centerY)), round(self.drawRadius))
         else:
             display.blit(self.image, (round(self.drawPosX+centerX-self.drawRadius), round(self.drawPosY+centerY-self.drawRadius)))
     def showID(self):
@@ -434,7 +434,7 @@ while True:
                 if event.button == 4:
                     if not changeDensity:
                         if zoom:
-                            metersPerPixel *= 1.01
+                            metersPerPixel *= 1.05
                         if newRadius >= 3:
                             newRadius /= 1.05
                     else:
@@ -480,8 +480,10 @@ while True:
                         force = G*(self.metricMass*other.metricMass)/(distance**2)
                         acc = force/self.metricMass
 
-                        self.netX += x/distance * force
-                        self.netY += y/distance * force
+
+
+                        self.netX = (x/distance * force)/(10**22)
+                        self.netY = (y/distance * force)/(10**22)
 
                         self.velX -= acc * (x/distance) * defaultTimeinterval
                         self.velY -= acc * (y/distance) * defaultTimeinterval
@@ -521,7 +523,8 @@ while True:
             if sShowVel.state:
                 pygame.draw.line(display, magenta, (int(self.drawPosX+centerX), int(self.drawPosY+centerY)), (int(self.drawPosX+(self.velX/10)+centerX), int(self.drawPosY+(self.velY/10)+centerY)))
             if sShowFor.state:
-                pygame.draw.line(display, cyan, (self.drawPosX, self.drawPosY), (int(self.drawPosX-(self.netX/100000000))), int(self.drawPosY-(self.netY/100000000)))
+                print(self.netX, self.netY)
+                pygame.draw.line(display, cyan, (self.drawPosX+centerX, self.drawPosY+centerY), ((int(self.drawPosX-self.netX)+centerX), int(self.drawPosY-self.netY)+centerY), 2)
             if sShowID.state:
                 self.showID()
             self.netX = 0
@@ -589,11 +592,15 @@ while True:
         radiusInfo = PanelFont.render("  " + str(int(metersPerPixel*newRadius)) + "m", 1, black)
         densityLabel = PanelFont.render("Current Density:", 1, black)
         densityInfo = PanelFont.render("  " + str(int(newDensity))+"Kg/m^3", 1, black)
+        scaleLabel = PanelFont.render("Current Scale:", 1, black)
+        scaleInfo = PanelFont.render("  " + str(int(metersPerPixel))+"meters per pixel", 1, black)
         
         display.blit(radiusLabel, (8, 50+int(height/2)))
         display.blit(radiusInfo, (8, 70+int(height/2)))
-        display.blit(densityLabel, (8, 90+int(height/2)))
-        display.blit(densityInfo, (8, 110+int(height/2)))
+        display.blit(densityLabel, (8, 100+int(height/2)))
+        display.blit(densityInfo, (8, 120+int(height/2)))
+        display.blit(scaleLabel, (8, 150+int(height/2)))
+        display.blit(scaleInfo, (8, 170+int(height/2)))
 
 
         colour5, bResetClicked = bReset.buttonClicked(clicked, X, Y) 
