@@ -286,13 +286,16 @@ bottomGraph = int(height/2+34)
 pGraph = Panel("Graph 1", white, leftGraph, topGraph, rightGraph-leftGraph, bottomGraph-topGraph)
 pExit = Panel("Exit", grey4, int((width/2)-300), int((height/2)-100), 600, 300)
 pLearn = Panel("Learn", grey2, int(((5*width)/8)+9), (height/2)+36, int(((3*width)/8)-12), (height/2)-46)
+pInstructions = Panel ("instructions", white, int((width/8)+7), 34, int(width/2), 4*height/5+40)
 
 ##buttons
 bExit = Button("x", red, width-52, 1, 50, 30)
 bMin = Button("_", grey1, width-103, 1, 50, 30)
 bEnter = Button("Enter", grey2, (width/2)-150, (height/2)-40, 100, 80)
 bOpen = Button("Open", grey2, width/2, (height/2)-40, 100, 80)
+
 bMainMenu = Button("Exit", grey2, 36, 3, 50, 26)
+bInstructions = Button("Instructions", grey2, 100, 3, 120, 26)
 
 bReset = Button("reset", red, int((width/8)+111), height-115, 86, 44)
 bIncrease = Button(">>+", cyan, int((width/8)+202), height-115, 86, 44)
@@ -589,11 +592,11 @@ while True:
 
             
         radiusLabel = PanelFont.render("Current Radius:", 1, black)
-        radiusInfo = PanelFont.render("  " + str(int(metersPerPixel*newRadius)) + "m", 1, black)
+        radiusInfo = PanelFont.render("  " + str(int(metersPerPixel*newRadius)) + " m", 1, black)
         densityLabel = PanelFont.render("Current Density:", 1, black)
-        densityInfo = PanelFont.render("  " + str(int(newDensity))+"Kg/m^3", 1, black)
+        densityInfo = PanelFont.render("  " + str(int(newDensity))+" Kg/m^3", 1, black)
         scaleLabel = PanelFont.render("Current Scale:", 1, black)
-        scaleInfo = PanelFont.render("  " + str(int(metersPerPixel))+"meters per pixel", 1, black)
+        scaleInfo = PanelFont.render("  " + str(int(metersPerPixel))+" meters per pixel", 1, black)
         
         display.blit(radiusLabel, (8, 50+int(height/2)))
         display.blit(radiusInfo, (8, 70+int(height/2)))
@@ -634,6 +637,44 @@ while True:
         WindowGUI(clicked, X, Y)
         colour4, bMainMenuClicked = bMainMenu.buttonClicked(clicked, X, Y)
         bMainMenu.displayButton(colour4)
+
+        colour13, bInstructionsClicked = bInstructions.buttonClicked(clicked, X, Y)
+        bInstructions.displayButton(colour13)
+
+        if bInstructionsClicked:
+            pInstructions.displayPanel()
+
+            ##tool bar instructions
+            InsToolBar = PanelFont.render("1) Tool bar - This panel gives you options to affect the simulation screen", 1, black)
+            display.blit(InsToolBar, (pInstructions.posX+5, pInstructions.posY+30))
+            pygame.draw.line(display, black, (pInstructions.posX+5, pInstructions.posY+30), (pTools.posX+50, pTools.posY+10), 3)
+
+            InsBounce = PanelFont.render("a) Bounce - Toggle weather or not the objects bounce off the sides of the simulation panel", 1, black)
+            display.blit(InsBounce, (pInstructions.posX+20, pInstructions.posY+60))
+            pygame.draw.line(display, blue, (pInstructions.posX+20, pInstructions.posY+60), (sBounce.posX, sBounce.posY), 3)
+
+            InsShowID = PanelFont.render("b) Show ID - View the ID of each object", 1, black)
+            display.blit(InsShowID, (pInstructions.posX+20, pInstructions.posY+90))
+            pygame.draw.line(display, yellow, (pInstructions.posX+20, pInstructions.posY+90), (sShowID.posX, sShowID.posY), 3)
+
+            InsShowVel = PanelFont.render("c) Show velocity - View the velocity of each object", 1, black)
+            display.blit(InsShowVel, (pInstructions.posX+20, pInstructions.posY+120))
+            pygame.draw.line(display, yellow, (pInstructions.posX+20, pInstructions.posY+120), (sShowVel.posX, sShowVel.posY), 3)
+
+            InsShowFor = PanelFont.render("c) Show net force - View the net force acting on each object", 1, black)
+            display.blit(InsShowFor, (pInstructions.posX+20, pInstructions.posY+150))
+            pygame.draw.line(display, yellow, (pInstructions.posX+20, pInstructions.posY+150), (sShowFor.posX, sShowFor.posY), 3)
+
+            #Info panel instructions
+            InsInfo = PanelFont.render("2) Information Panel - This lets you vie information about the current time in the simulation", 1, black)
+            display.blit(InsInfo, (pInstructions.posX+5, pInstructions.posY+200))
+            pygame.draw.line(display, black, (pInstructions.posX+5, pInstructions.posY+200), (pInfo.posX+40, pInfo.posY), 3)
+
+            InsCurrRad =  PanelFont.render("a) Current radius is the radius of the pointer used to insert objects", 1, black)
+            display.blit(InsCurrRad, (pInstructions.posX+20, pInstructions.posY+230))
+            #pygame.draw.line(display, )
+
+
 
         if bMainMenuClicked:
             done = False
