@@ -16,8 +16,8 @@ print("version 4")
 pygame.init()
 
 ##defining the pyagame display
-width = ((pygame.display.Info()).current_w)#sets display width to the screen's width resolution
-height = ((pygame.display.Info()).current_h)#sets display height to the screen's height resolution
+width = int(((pygame.display.Info()).current_w))#sets display width to the screen's width resolution
+height = int(((pygame.display.Info()).current_h))#sets display height to the screen's height resolution
 display = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
 
 
@@ -31,6 +31,8 @@ EAEarth = pygame.transform.scale(pygame.image.load('europe-african-Globe.png'), 
 AmEarth = pygame.transform.scale(pygame.image.load('American-Globe.png'), (int((2*6371000)/metersPerPixel), int((2*6371000)/metersPerPixel)))
 AsEarth = pygame.transform.scale(pygame.image.load('asian-Globe.png'), (int((2*6371000)/metersPerPixel), int((2*6371000)/metersPerPixel)))
 
+gravitationFormula = pygame.image.load('formulas.jpg')
+suvatFormula = pygame.image.load('suvat.jpg')
 
 ##setting up the timing
 FPS = 120
@@ -46,6 +48,7 @@ black = (0, 0, 0)
 blue = (0, 0, 255)
 red = (255, 0, 0)
 green = (0, 255, 0)
+green2 = (0, 150, 0)
 yellow = (255, 255, 0)
 cyan = (0, 255, 255)
 magenta = (255, 0, 255)
@@ -60,6 +63,7 @@ PanelFont = pygame.font.SysFont("Consolas", 16)
 SwitchFont = pygame.font.SysFont("Consolas", 14)
 InputBoxFont = pygame.font.SysFont("Consolas", 13)
 ObjectFont = pygame.font.SysFont("Consolas", 12)
+LearnFont = pygame.font.SysFont("Consolas", 24)
 
 def Positions():
 
@@ -274,9 +278,9 @@ def exiting(exit):
 
 ##panels
 pTools = Panel("Tools", grey2, 5, 34, int(width/8), int(height/2))
-pInfo = Panel("Info", grey2, 5, 36+int(height/2), int(width/8), int(height/2)-46)
-pSimulation = Panel("Simulation", black, int((width/8)+7), 34, int(width/2), 4*height/5+40)
-pTime = Panel("Time", grey2, int((width/8)+7), height-11, int(width/2), -152)
+pInfo = Panel("Info", grey2, 5, int(pTools.posY+pTools.sizeY+2), int(width/8), int(height/2)-46)
+pSimulation = Panel("Simulation", black, int(pTools.posX+pTools.sizeX+2), 34, int(width/2), 4*height/5)
+pTime = Panel("Time", grey2, int(pTools.posX+pTools.sizeX+2), int(pSimulation.posY+pSimulation.sizeY+2), int(width/2), (height-int(pSimulation.posY+pSimulation.sizeY+12)))
 
 topGraph = 34
 leftGraph = int(((5*width)/8)+9)
@@ -286,7 +290,10 @@ bottomGraph = int(height/2+34)
 pGraph = Panel("Graph 1", white, leftGraph, topGraph, rightGraph-leftGraph, bottomGraph-topGraph)
 pExit = Panel("Exit", grey4, int((width/2)-300), int((height/2)-100), 600, 300)
 pLearn = Panel("Learn", grey2, int(((5*width)/8)+9), (height/2)+36, int(((3*width)/8)-12), (height/2)-46)
-pInstructions = Panel ("instructions", white, int((width/8)+7), 34, int(width/2), 4*height/5+40)
+gravitationFormula = pygame.transform.scale(gravitationFormula, (int(((3*width)/8)-112), int((height/2)-146)))
+suvatFormula = pygame.transform.scale(suvatFormula, (int(((3*width)/8)-112), int((height/2)-146)))
+
+pInstructions = Panel ("instructions", white, int(pTools.posX+pTools.sizeX+2), 34, int(width/2), 4*height/5)
 
 ##buttons
 bExit = Button("x", red, width-52, 1, 50, 30)
@@ -296,18 +303,22 @@ bOpen = Button("Open", grey2, width/2, (height/2)-40, 100, 80)
 
 bMainMenu = Button("Exit", grey2, 36, 3, 50, 26)
 bInstructions = Button("Instructions", grey2, 100, 3, 120, 26)
+bInstructions2 = Button("more Instructions", grey2, 235, 3, 170, 26)
 
-bReset = Button("reset", red, int((width/8)+111), height-115, 86, 44)
-bIncrease = Button(">>+", cyan, int((width/8)+202), height-115, 86, 44)
-bDecrease = Button(">>-", cyan, int((width/8)+290), height-115, 86, 44)
+bReset = Button("reset", red, pTime.posX+95, pTime.posY+48, 86, 44)
+bIncrease = Button(">>+", cyan, bReset.posX+bReset.sizeX+5, pTime.posY+48, 86, 44)
+bDecrease = Button(">>-", cyan, bIncrease.posX+bIncrease.sizeX+5, pTime.posY+48, 86, 44)
 
 bSave = Button("save", green, int((width/2)-250), int((height/2)+100), 100, 50)
 bDontSave = Button("Dont save", red, int((width/2)-50), int((height/2)+100), 100, 50)
 bCancel = Button("Cancel", grey3, int((width/2)+150), int((height/2)+100), 100, 50)
 
+bGravity = Button("Gravity", green2, pLearn.posX+225, pLearn.posY+10, 100, 30)
+bSuvat = Button("Motion", green2, pLearn.posX+120, pLearn.posY+10, 100, 30)
+
 ##switches
 sBounce = Switch("Bounce", blue, 10, 100, False, "on", "off")#switch to turn on and off bounce
-sPausePlay = Switch("||/>", green, int((width/8)+11), height-115, False, "||", " >")#switch to pause and play
+sPausePlay = Switch("||/>", green, pTime.posX+5, pTime.posY+50, False, "||", " >")#switch to pause and play
 sShowID = Switch("Show ID", yellow,  10, 200, False, "on", "off")
 sShowVel = Switch("Show Velocity", yellow, 10, 300, False, "on", "off")
 sShowFor = Switch("Show net Force", yellow, 10, 400, False, "on", "off")
@@ -330,10 +341,10 @@ def WindowGUI(clicked, X, Y):
         pygame.display.iconify()
 
 def background():
-    pygame.draw.rect(display, grey1, (0, 0, width, 34))
-    pygame.draw.rect(display, grey1, (0, 0, int((width/8)+7),height))
-    pygame.draw.rect(display, grey1, (0, height, width, -165))
-    pygame.draw.rect(display, grey1, (width, 0, -int(((3*width)/8)-8), height))
+    pygame.draw.rect(display, grey1, (0, 0, width, pSimulation.posY))
+    pygame.draw.rect(display, grey1, (0, 0, pSimulation.posX, height))
+    pygame.draw.rect(display, grey1, (0, pSimulation.posY+pSimulation.sizeY, width, height))
+    pygame.draw.rect(display, grey1, (pSimulation.posX+pSimulation.sizeX, 0, width, height))
 
 inMainMenu = True
 clicked = False
@@ -357,7 +368,6 @@ while True:
     heldI=0
     ClickedLastFrame = False
     rightClickedLastFrame = False
-    count = 0
     opening = False
     fileNames = []
     buttons = []
@@ -398,7 +408,6 @@ while True:
                 if buttonClicked:
                     file = open("saves\\" + item.name, "r")
                     data = eval(file.readline())
-
                     inMainMenu = False
 
         pygame.display.update()
@@ -406,9 +415,9 @@ while True:
     time.sleep(0.5)
     
     for item in data:
-        metricradius = (((3*item[1])/(4*math.pi*item.density))**(1/3))
+        metricradius = (((3*item[1])/(4*math.pi*item[6]))**(1/3))
         Radius = metricradius/metersPerPixel
-        objects.append(Object(item[0], grey1, Radius, (item[2]/metersPerPixel)-centerX, (item[3]/metersPerPixel)-centerY, item[4], item[5], 1))
+        objects.append(Object(item[0], grey1, Radius, (item[2]/metersPerPixel), (item[3]/metersPerPixel), item[4], item[5], item[6]))
     
     ##simulation
     zoom = False
@@ -464,8 +473,6 @@ while True:
 
         pSimulation.displayPanel()
 
-        ##counting for slower animation
-        count += 1
 
         leftEdge = pSimulation.posX
         topEdge = pSimulation.posY
@@ -526,7 +533,6 @@ while True:
             if sShowVel.state:
                 pygame.draw.line(display, magenta, (int(self.drawPosX+centerX), int(self.drawPosY+centerY)), (int(self.drawPosX+(self.velX/10)+centerX), int(self.drawPosY+(self.velY/10)+centerY)))
             if sShowFor.state:
-                print(self.netX, self.netY)
                 pygame.draw.line(display, cyan, (self.drawPosX+centerX, self.drawPosY+centerY), ((int(self.drawPosX-self.netX)+centerX), int(self.drawPosY-self.netY)+centerY), 2)
             if sShowID.state:
                 self.showID()
@@ -547,7 +553,7 @@ while True:
             elif not clicked and ClickedLastFrame:
                 ClickedLastFrame = False
                 if newRadius < 150 and newRadius > 3:
-                    objects.append(Object(number, grey1, int(newRadius), initialX-centerX, initialY-centerY, (initialX-X), (initialY-Y), newDensity))
+                    objects.append(Object(number, grey1, int(newRadius), initialX-centerX, initialY-centerY, (initialX-X)*20, (initialY-Y)*20, newDensity))
                     number += 1
             elif not clicked and not ClickedLastFrame:
                 ClickedLastFrame = False
@@ -578,6 +584,22 @@ while True:
         pTime.displayPanel()
         pGraph.displayPanel()
         pLearn.displayPanel()
+
+
+        colour15, bGravityClicked = bGravity.buttonClicked(clicked, X, Y)
+        bGravity.displayButton(colour15)
+
+        colour16, bSuvatClicked = bSuvat.buttonClicked(clicked, X, Y)
+        bSuvat.displayButton(colour16)
+
+        if bGravityClicked:
+            display.blit(gravitationFormula, (pLearn.posX+50, pLearn.posY+50))
+        elif bSuvatClicked:
+            display.blit(suvatFormula, (pLearn.posX+50, pLearn.posY+50))
+        else:
+            learnText = LearnFont.render("click on the buttons above to see the formulas!", 1, black)
+            display.blit(learnText, (pLearn.posX+30, pLearn.posY+150))
+
 
         ##displaying the switches
         for switch in switches:
@@ -690,9 +712,64 @@ while True:
             pygame.draw.line(display, black, (pInstructions.posX+20, pInstructions.posY+410), (50, 200+int(height/2)), 3)
 
             #Time Panel instructions
-            InsTime = PanelFont.render("3) Time Panel")
+            InsTime = PanelFont.render("3) Time Panel - adjust the flow of time", 1, black)
+            display.blit(InsTime, (pInstructions.posX+5, pInstructions.posY+500))
+            pygame.draw.line(display, black, (pInstructions.posX+5, pInstructions.posY+510), (pTime.posX, pTime.posY), 3)
 
+            InsPause = PanelFont.render("a) Pause/Play switch - stop and start the flow of time", 1, black)
+            display.blit(InsPause, (pInstructions.posX+20, pInstructions.posY+530))
+            pygame.draw.line(display, green, (pInstructions.posX+20, pInstructions.posY+540), (sPausePlay.posX+30, sPausePlay.posY), 3)
 
+            InsReset = PanelFont.render("b) Reset button - deletes all objects on the screen", 1, black)
+            display.blit(InsReset, (pInstructions.posX+35, pInstructions.posY+560))
+            pygame.draw.line(display, red, (pInstructions.posX+35, pInstructions.posY+570), (bReset.posX+30, bReset.posY), 3)
+
+            InsIncrease = PanelFont.render("c) >>+ - speed up the flow of time", 1, black)
+            display.blit(InsIncrease, (pInstructions.posX+50, pInstructions.posY+590))
+            pygame.draw.line(display, cyan, (pInstructions.posX+50, pInstructions.posY+600), (bIncrease.posX+30, bIncrease.posY), 3)
+
+            InsDecrease = PanelFont.render("d) >>- - slow down the flow of time", 1, black)
+            display.blit(InsDecrease, (pInstructions.posX+65, pInstructions.posY+620))
+            pygame.draw.line(display, cyan, (pInstructions.posX+65, pInstructions.posY+630), (bDecrease.posX+30, bDecrease.posY), 3)
+
+        colour14, bInstructions2clicked = bInstructions2.buttonClicked(clicked, X, Y)
+        bInstructions2.displayButton(colour14)
+
+        if bInstructions2clicked:
+            pInstructions.displayPanel()
+
+            Ins1 = PanelFont.render("How to use the simulation:", 1, black)
+            display.blit(Ins1, (pInstructions.posX+5, pInstructions.posY+30))
+
+            Ins2 = PanelFont.render("1) Move the mouse over the black simulation screen. you should see a blue circle where the mouse is.", 1, black)
+            display.blit(Ins2, (pInstructions.posX+5, pInstructions.posY+60))
+
+            Ins3 = PanelFont.render("2) Use the scroll wheel to change the size of the blue circle", 1, black)
+            display.blit(Ins3, (pInstructions.posX+5, pInstructions.posY+90))
+
+            Ins4 = PanelFont.render("3) Left click on the simulation screen to add an object the same size as the blue circle", 1, black)
+            display.blit(Ins4, (pInstructions.posX+5, pInstructions.posY+120))
+
+            Ins5 = PanelFont.render("4) Left click and drag on the simulation screen to adjust the object's initial velocity", 1, black)
+            display.blit(Ins5, (pInstructions.posX+5, pInstructions.posY+150))
+
+            Ins6 = PanelFont.render("5) You can add multiple objects into the simulation at a time. They will automatically iteract by gravity", 1, black)
+            display.blit(Ins6, (pInstructions.posX+5, pInstructions.posY+180))
+
+            Ins7 = PanelFont.render("6) Holding down shift and z will let you zoom in and out by using the scroll wheel", 1, black)
+            display.blit(Ins7, (pInstructions.posX+5, pInstructions.posY+210))
+
+            Ins8 = PanelFont.render("7) Holding down shift and d will let you change the density of the next object using the scroll wheel", 1, black)
+            display.blit(Ins8, (pInstructions.posX+5, pInstructions.posY+240))
+
+            Ins9 = PanelFont.render("8) Right clicking will add in the planet earth (useful for understanding the scale)", 1, black)
+            display.blit(Ins9, (pInstructions.posX+5, pInstructions.posY+270))
+
+            Ins10 = PanelFont.render("9) The planet earth will always be the same size, density and mass no matter what settings are used", 1, black)
+            display.blit(Ins10, (pInstructions.posX+5, pInstructions.posY+300))
+
+            Ins12 = PanelFont.render("10) Radius of Earth is 6,371,000m, Density of earth is 5500kg/m^3", 1, black)
+            display.blit(Ins12, (pInstructions.posX+5, pInstructions.posY+330))
 
         if bMainMenuClicked:
             done = False
@@ -738,7 +815,7 @@ while True:
                     file = open("saves\\"+FileName+".txt", "w")
                     data = []
                     for item in objects:
-                        data.append([item.ID, item.metricMass, item.metricPosX, item.metricPosY, item.velX, item.velY])
+                        data.append([item.ID, item.metricMass, item.metricPosX, item.metricPosY, item.velX, item.velY, item.density])
                     file.write(str(data))
                     file.close()
                     SaveText = PanelFont.render("saving as: "+FileName, 1, grey1)
