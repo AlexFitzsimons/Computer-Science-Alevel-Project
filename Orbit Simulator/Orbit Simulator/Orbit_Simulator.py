@@ -597,14 +597,18 @@ while True:
         densityInfo = PanelFont.render("  " + str(int(newDensity))+" Kg/m^3", 1, black)
         scaleLabel = PanelFont.render("Current Scale:", 1, black)
         scaleInfo = PanelFont.render("  " + str(int(metersPerPixel))+" meters per pixel", 1, black)
-        
+        timeLabel = PanelFont.render("Current speed of time:", 1, black)
+        timeInfo = PanelFont.render("  x"+str(int(round(FPS*defaultTimeinterval, 3))), 1, black)
+
+
         display.blit(radiusLabel, (8, 50+int(height/2)))
         display.blit(radiusInfo, (8, 70+int(height/2)))
         display.blit(densityLabel, (8, 100+int(height/2)))
         display.blit(densityInfo, (8, 120+int(height/2)))
         display.blit(scaleLabel, (8, 150+int(height/2)))
         display.blit(scaleInfo, (8, 170+int(height/2)))
-
+        display.blit(timeLabel, (8, 200+int(height/2)))        
+        display.blit(timeInfo, (8, 220+int(height/2)))
 
         colour5, bResetClicked = bReset.buttonClicked(clicked, X, Y) 
         bReset.displayButton(colour5)
@@ -631,8 +635,7 @@ while True:
         elif not bDecreaseClicked:
             heldD=0
 
-        speedvalue = ButtonFont.render("x"+str(int(round(FPS*defaultTimeinterval, 3))), 1, black)
-        display.blit(speedvalue, (bDecrease.posX+bDecrease.sizeX+4, bDecrease.posY))
+
 
         WindowGUI(clicked, X, Y)
         colour4, bMainMenuClicked = bMainMenu.buttonClicked(clicked, X, Y)
@@ -661,18 +664,33 @@ while True:
             display.blit(InsShowVel, (pInstructions.posX+20, pInstructions.posY+120))
             pygame.draw.line(display, yellow, (pInstructions.posX+20, pInstructions.posY+120), (sShowVel.posX, sShowVel.posY), 3)
 
-            InsShowFor = PanelFont.render("c) Show net force - View the net force acting on each object", 1, black)
+            InsShowFor = PanelFont.render("d) Show net force - View the net force acting on each object", 1, black)
             display.blit(InsShowFor, (pInstructions.posX+20, pInstructions.posY+150))
             pygame.draw.line(display, yellow, (pInstructions.posX+20, pInstructions.posY+150), (sShowFor.posX, sShowFor.posY), 3)
 
             #Info panel instructions
             InsInfo = PanelFont.render("2) Information Panel - This lets you vie information about the current time in the simulation", 1, black)
-            display.blit(InsInfo, (pInstructions.posX+5, pInstructions.posY+200))
-            pygame.draw.line(display, black, (pInstructions.posX+5, pInstructions.posY+200), (pInfo.posX+40, pInfo.posY), 3)
+            display.blit(InsInfo, (pInstructions.posX+5, pInstructions.posY+300))
+            pygame.draw.line(display, black, (pInstructions.posX+5, pInstructions.posY+300), (pInfo.posX, pInfo.posY), 3)
 
-            InsCurrRad =  PanelFont.render("a) Current radius is the radius of the pointer used to insert objects", 1, black)
-            display.blit(InsCurrRad, (pInstructions.posX+20, pInstructions.posY+230))
-            #pygame.draw.line(display, )
+            InsCurrRad =  PanelFont.render("a) Current radius is the radius of the pointer used to insert objects in m", 1, black)
+            display.blit(InsCurrRad, (pInstructions.posX+20, pInstructions.posY+330))
+            pygame.draw.line(display, black, (pInstructions.posX+20, pInstructions.posY+330), (50, 50+int(height/2)), 3)
+
+            InsCurrDens =  PanelFont.render("b) Current density is the density selected for the next object in Kg/m^3", 1, black)
+            display.blit(InsCurrDens, (pInstructions.posX+20, pInstructions.posY+360))
+            pygame.draw.line(display, black, (pInstructions.posX+20, pInstructions.posY+360), (50, 100+int(height/2)), 3)
+
+            InsCurrScale = PanelFont.render("c) Current Scale is the number of meters in a pixel", 1, black)
+            display.blit(InsCurrScale, (pInstructions.posX+20, pInstructions.posY+390))
+            pygame.draw.line(display, black, (pInstructions.posX+20, pInstructions.posY+390), (50, 150+int(height/2)), 3)
+
+            InsCurrTime = PanelFont.render("d) Current speed of time is how quickly the simulation is going", 1, black)
+            display.blit(InsCurrTime, (pInstructions.posX+20, pInstructions.posY+410))
+            pygame.draw.line(display, black, (pInstructions.posX+20, pInstructions.posY+410), (50, 200+int(height/2)), 3)
+
+            #Time Panel instructions
+            InsTime = PanelFont.render("3) Time Panel")
 
 
 
