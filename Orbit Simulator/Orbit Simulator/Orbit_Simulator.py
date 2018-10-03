@@ -442,8 +442,8 @@ while True:
     changeXaxis = False
     changeYaxis = False
     started = False
-    XCoords = []
-    YCoords = []
+    XMetricCoords = []
+    YMetricCoords = []
     while not inMainMenu:
         ##inputs
         X = list(pygame.mouse.get_pos())[0]#gets x coordinate of mouse
@@ -714,50 +714,46 @@ while True:
             for self in objects:
                 if self.ID == VarX[1]:
                     if VarX[0] == VX:
-                        XCoords.append(self.velX)
+                        XMetricCoords.append(self.velX)
                     elif VarX[0] == VY:
-                        XCoords.append(self.velY)
+                        XMetricCoords.append(self.velY)
                 elif self.ID == VarY[1]:
                     if VarY[0] == VX:
-                        YCoords.append(self.velX)
+                        YMetricCoords.append(self.velX)
                     elif VarY[0] == VY:
-                        YCoords.append(self.velY)
+                        YMetricCoords.append(self.velY)
 
             if VarY[0] == T:
                 try:
-                    timeElapsed = YCoords[len(YCoords)-1]
+                    timeElapsed = YMetricCoords[len(YMetricCoords)-1]
                 except:
                     timeElapsed = 0
-                YCoords.append((1/FPS)+timeElapsed)
+                YMetricCoords.append((30/FPS)+timeElapsed)
 
             if VarX[0] == T:
                 try:
-                    timeElapsed = XCoords[len(XCoords)-1]
+                    timeElapsed = XMetricCoords[len(XMetricCoords)-1]
                 except:
                     timeElapsed = 0
-                XCoords.append((1/FPS)+timeElapsed)
-
-            minX = min(XCoords)
-            maxX = max(XCoords)
-            minY = min(YCoords)
-            maxY = max(YCoords)
-
-            graphWidth = maxX-minX
-            graphHeight = maxY-minY
-
-            for xCoord in XCoords:
-                if graphWidth != 0:
-                     Wratio = (pGraph.sizeX-100)/graphWidth
-                     xCoord *= Wratio
-
-            for yCoord in YCoords:
-                if graphHeight != 0:
-                     Hratio = (pGraph.sizeY-100)/graphHeight
-                     xCoord *= Hratio
+                XMetricCoords.append((30/FPS)+timeElapsed)
 
             coords = []
-            for n in range(len(XCoords)):
-                coords.append((XCoords[n]+originX, -(YCoords[n])+originY))
+            XGraphCoords = []
+            YGraphCoords = []
+
+            for n in range(len(XMetricCoords)):
+                XGraphCoords.append(XMetricCoords[n]+originX)
+                YGraphCoords.append(-(YMetricCoords[n]/100)+originY)
+
+            minX = min(XGraphCoords)-originX
+            maxX = max(XGraphCoords)-originX
+            minY = min(YGraphCoords)-originY
+            maxY = max(YGraphCoords)-originY
+
+            for n in range(len(XGraphCoords)):
+                XGraphCoords[n] += minX
+                YGraphCoords[n] += minY
+                coords.append((XGraphCoords[n], YGraphCoords[n]))
             try:
                 pygame.draw.lines(display, blue, False, coords, 2)
             except:
