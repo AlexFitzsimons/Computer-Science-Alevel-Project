@@ -293,7 +293,9 @@ pLearn = Panel("Learn", grey2, int(((5*width)/8)+9), (height/2)+36, int(((3*widt
 gravitationFormula = pygame.transform.scale(gravitationFormula, (int(((3*width)/8)-112), int((height/2)-146)))
 suvatFormula = pygame.transform.scale(suvatFormula, (int(((3*width)/8)-112), int((height/2)-146)))
 
-pInstructions = Panel ("instructions", white, int(pTools.posX+pTools.sizeX+2), 34, int(width/2), 4*height/5)
+pInstructions = Panel("instructions", white, int(pTools.posX+pTools.sizeX+2), 34, int(width/2), 4*height/5)
+pChangeX = Panel("Change x axis", grey2, leftGraph, topGraph, rightGraph-leftGraph, bottomGraph-topGraph)
+pChangeY = Panel("Change y axis", grey2, leftGraph, topGraph, rightGraph-leftGraph, bottomGraph-topGraph)
 
 ##buttons
 bExit = Button("x", red, width-52, 1, 50, 30)
@@ -315,6 +317,12 @@ bCancel = Button("Cancel", grey3, int((width/2)+150), int((height/2)+100), 100, 
 
 bGravity = Button("Gravity", green2, pLearn.posX+225, pLearn.posY+10, 100, 30)
 bSuvat = Button("Motion", green2, pLearn.posX+120, pLearn.posY+10, 100, 30)
+
+bX = Button("x", green, pGraph.posX+(pGraph.sizeX/2)-20, pGraph.posY+pGraph.sizeY-25, 40, 20)
+bY = Button("y", green, pGraph.posX+5, pGraph.posY+(pGraph.sizeY/2)-20, 20, 40)
+
+bXvel = Button("Velocity X", yellow, pGraph.posX+30, pGraph.posY+30, 200, 50)
+bYvel = Button("Velocity Y", yellow, pGraph.posX+30, pGraph.posY+90, 200, 50)
 
 ##switches
 sBounce = Switch("Bounce", blue, 10, 100, False, "on", "off")#switch to turn on and off bounce
@@ -422,6 +430,13 @@ while True:
     ##simulation
     zoom = False
     changeDensity = False
+
+    VarX = ["Time", -1]
+    VarY = ["Velocity x", 0]
+    changeXaxis = False
+    changeYaxis = False
+
+
     while not inMainMenu:
         ##inputs
         X = list(pygame.mouse.get_pos())[0]#gets x coordinate of mouse
@@ -585,6 +600,49 @@ while True:
         pGraph.displayPanel()
         pLearn.displayPanel()
 
+
+        originX = pGraph.posX+50
+        originY = pGraph.posY+pGraph.sizeY-50
+
+        pygame.draw.line(display, black, (originX, pGraph.posY+50), (originX, originY), 2)
+        colour17, bXClicked = bX.buttonClicked(clicked, X, Y)
+        bX.displayButton(colour17)
+
+        pygame.draw.line(display, black, (originX, originY), (pGraph.posX+pGraph.sizeX-50, originY), 2)
+        colour18, bYClicked = bY.buttonClicked(clicked, X, Y)
+        bY.displayButton(colour18)
+
+        if VarX[1] != -1:
+            Xaxis = PanelFont.render("x axis = " + VarX[0] + " of object " + str(VarX[1]), 1, black)
+            display.blit(Xaxis, (pGraph.posX+(pGraph.sizeX/2)-100, pGraph.posY+10))
+        else:
+            Xaxis = PanelFont.render("x axis = " + VarX[0], 1, black)
+            display.blit(Xaxis, (pGraph.posX+(pGraph.sizeX/2)-100, pGraph.posY+10))
+
+        if bXClicked:
+            changeXaxis = True
+        if bYClicked:
+            changeYaxis = True
+
+        if changeXaxis:
+            pChangeX.displayPanel()
+
+            colour19, bXvelClicked = bXvel.buttonClicked(clicked, X, Y)
+            bXvel.displayButton(colour19)
+
+            colour20, bYvelClicked = bYvel.buttonClicked(clicked, X, Y)
+            bYvel.displayButton(colour20)
+
+            if bXvelClicked:
+                VarX[0] = "Yelocity x"
+                changeXaxis = False
+
+            if bYvelClicked:
+                VarX[0] = "Yelocity y"
+                changeXaxis = False
+
+        if changeYaxis:
+            pChangeY.displayPanel()
 
         colour15, bGravityClicked = bGravity.buttonClicked(clicked, X, Y)
         bGravity.displayButton(colour15)
@@ -770,6 +828,7 @@ while True:
 
             Ins12 = PanelFont.render("10) Radius of Earth is 6,371,000m, Density of earth is 5500kg/m^3", 1, black)
             display.blit(Ins12, (pInstructions.posX+5, pInstructions.posY+330))
+
 
         if bMainMenuClicked:
             done = False
