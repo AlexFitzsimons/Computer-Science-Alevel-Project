@@ -321,8 +321,14 @@ bSuvat = Button("Motion", green2, pLearn.posX+120, pLearn.posY+10, 100, 30)
 bX = Button("x", green, pGraph.posX+(pGraph.sizeX/2)-20, pGraph.posY+pGraph.sizeY-25, 40, 20)
 bY = Button("y", green, pGraph.posX+5, pGraph.posY+(pGraph.sizeY/2)-20, 20, 40)
 
-bXvel = Button("Velocity X", yellow, pGraph.posX+30, pGraph.posY+30, 200, 50)
-bYvel = Button("Velocity Y", yellow, pGraph.posX+30, pGraph.posY+90, 200, 50)
+VX = "Velocity X (m/s)"
+bXvel = Button(VX, yellow, pGraph.posX+30, pGraph.posY+30, 200, 50)
+VY = "Velocity Y (m/s)"
+bYvel = Button(VY, yellow, pGraph.posX+30, pGraph.posY+90, 200, 50)
+T = "Time (s)"
+bTime = Button(T, yellow, pGraph.posX+30, pGraph.posY+150, 200, 50)
+
+bStartGraph = Button("Start Graphing!", red, pGraph.posX+(pGraph.sizeX/2)-80, pGraph.posY+(pGraph.sizeY/2)-15, 160, 30)
 
 ##switches
 sBounce = Switch("Bounce", blue, 10, 100, False, "on", "off")#switch to turn on and off bounce
@@ -431,12 +437,13 @@ while True:
     zoom = False
     changeDensity = False
 
-    VarX = ["Time", -1]
-    VarY = ["Velocity x", 0]
+    VarX = [T, -1]
+    VarY = [VX, 0]
     changeXaxis = False
     changeYaxis = False
-
-
+    started = False
+    XCoords = []
+    YCoords = []
     while not inMainMenu:
         ##inputs
         X = list(pygame.mouse.get_pos())[0]#gets x coordinate of mouse
@@ -504,8 +511,6 @@ while True:
 
                         force = G*(self.metricMass*other.metricMass)/(distance**2)
                         acc = force/self.metricMass
-
-
 
                         self.netX = (x/distance * force)/(10**22)
                         self.netY = (y/distance * force)/(10**22)
@@ -601,23 +606,43 @@ while True:
         pLearn.displayPanel()
 
 
+
+        ### Graphing
+        
+        ##drawing the axes
+
+        #defines the origin position of the graph
         originX = pGraph.posX+50
         originY = pGraph.posY+pGraph.sizeY-50
 
+        #draws X axis
         pygame.draw.line(display, black, (originX, pGraph.posY+50), (originX, originY), 2)
+
+        #draws button X
         colour17, bXClicked = bX.buttonClicked(clicked, X, Y)
         bX.displayButton(colour17)
 
+        #draws Y axis
         pygame.draw.line(display, black, (originX, originY), (pGraph.posX+pGraph.sizeX-50, originY), 2)
+
+        #draws button Y
         colour18, bYClicked = bY.buttonClicked(clicked, X, Y)
         bY.displayButton(colour18)
 
-        if VarX[1] != -1:
-            Xaxis = PanelFont.render("x axis = " + VarX[0] + " of object " + str(VarX[1]), 1, black)
-            display.blit(Xaxis, (pGraph.posX+(pGraph.sizeX/2)-100, pGraph.posY+10))
+        ##this section shows what the x and y axes are representing
+        if VarX[0] != "Time (s)":#this is used so that measures that dont belong to an object get the right label
+            Xaxis = PanelFont.render("x axis = " + VarX[0] + " of object " + str(VarX[1]), 1, black)#text telling the user what variables are being measured on the X axis
+            display.blit(Xaxis, (pGraph.posX+(pGraph.sizeX/2)-100, pGraph.posY+5))#diaplaying that text
         else:
-            Xaxis = PanelFont.render("x axis = " + VarX[0], 1, black)
-            display.blit(Xaxis, (pGraph.posX+(pGraph.sizeX/2)-100, pGraph.posY+10))
+            Xaxis = PanelFont.render("x axis = " + VarX[0], 1, black)#text telling the user what variables are being measured on the X axis
+            display.blit(Xaxis, (pGraph.posX+(pGraph.sizeX/2)-100, pGraph.posY+5))#text telling the user what variables are being measured on the X axis
+
+        if VarY[0] != "Time (s)":
+            Yaxis = PanelFont.render("y axis = " + VarY[0] + " of object " + str(VarY[1]), 1, black)#text telling the user what variables are being measured on the Y axis
+            display.blit(Yaxis, (pGraph.posX+(pGraph.sizeX/2)-100, pGraph.posY+20))#text telling the user what variables are being measured on the Y axis
+        else:
+            Yaxis = PanelFont.render("y axis = " + VarY[0], 1, black)#text telling the user what variables are being measured on the Y axis
+            display.blit(Yaxis, (pGraph.posX+(pGraph.sizeX/2)-100, pGraph.posY+20))#text telling the user what variables are being measured on the Y axis
 
         if bXClicked:
             changeXaxis = True
@@ -633,16 +658,119 @@ while True:
             colour20, bYvelClicked = bYvel.buttonClicked(clicked, X, Y)
             bYvel.displayButton(colour20)
 
+            colour21, bTimeClicked = bTime.buttonClicked(clicked, X, Y)
+            bTime.displayButton(colour21)
+
             if bXvelClicked:
-                VarX[0] = "Yelocity x"
+                VarX[0] = VX
                 changeXaxis = False
+                if VarX[1] == -1:
+                    VarX[1] = 0
 
             if bYvelClicked:
-                VarX[0] = "Yelocity y"
+                VarX[0] = VY
+                if VarX[1] == -1:
+                    VarX[1] = 0
+                changeXaxis = False
+
+            if bTimeClicked:
+                VarX[0] = T
+                VarX[1] = -1
                 changeXaxis = False
 
         if changeYaxis:
             pChangeY.displayPanel()
+
+            colour19, bXvelClicked = bXvel.buttonClicked(clicked, X, Y)
+            bXvel.displayButton(colour19)
+
+            colour20, bYvelClicked = bYvel.buttonClicked(clicked, X, Y)
+            bYvel.displayButton(colour20)
+
+            colour21, bTimeClicked = bTime.buttonClicked(clicked, X, Y)
+            bTime.displayButton(colour21)
+
+            if bXvelClicked:
+                VarY[0] = VX
+                if VarY[1] == -1:
+                    VarY[1] = 0
+                changeYaxis = False
+
+            if bYvelClicked:
+                VarY[0] = VY
+                if VarY[1] == -1:
+                    VarY[1] = 0
+                changeYaxis = False
+
+            if bTimeClicked:
+                VarY[0] = T
+                VarY[1] = -1
+                changeYaxis = False
+
+        colour22, bStartGraphClicked = bStartGraph.buttonClicked(clicked, X, Y)
+        if not started:
+            bStartGraph.displayButton(colour22)
+        else:
+            for self in objects:
+                if self.ID == VarX[1]:
+                    if VarX[0] == VX:
+                        XCoords.append(self.velX)
+                    elif VarX[0] == VY:
+                        XCoords.append(self.velY)
+                elif self.ID == VarY[1]:
+                    if VarY[0] == VX:
+                        YCoords.append(self.velX)
+                    elif VarY[0] == VY:
+                        YCoords.append(self.velY)
+
+            if VarY[0] == T:
+                try:
+                    timeElapsed = YCoords[len(YCoords)-1]
+                except:
+                    timeElapsed = 0
+                YCoords.append((1/FPS)+timeElapsed)
+
+            if VarX[0] == T:
+                try:
+                    timeElapsed = XCoords[len(XCoords)-1]
+                except:
+                    timeElapsed = 0
+                XCoords.append((1/FPS)+timeElapsed)
+
+            minX = min(XCoords)
+            maxX = max(XCoords)
+            minY = min(YCoords)
+            maxY = max(YCoords)
+
+            graphWidth = maxX-minX
+            graphHeight = maxY-minY
+
+            for xCoord in XCoords:
+                if graphWidth != 0:
+                     Wratio = (pGraph.sizeX-100)/graphWidth
+                     xCoord *= Wratio
+
+            for yCoord in YCoords:
+                if graphHeight != 0:
+                     Hratio = (pGraph.sizeY-100)/graphHeight
+                     xCoord *= Hratio
+
+            coords = []
+            for n in range(len(XCoords)):
+                coords.append((XCoords[n]+originX, -(YCoords[n])+originY))
+            try:
+                pygame.draw.lines(display, blue, False, coords, 2)
+            except:
+                pass
+
+                       
+        if bStartGraphClicked:
+            started = True
+            XCoords = []
+            YCoords = []
+
+
+
 
         colour15, bGravityClicked = bGravity.buttonClicked(clicked, X, Y)
         bGravity.displayButton(colour15)
