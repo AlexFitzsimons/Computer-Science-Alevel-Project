@@ -737,33 +737,52 @@ while True:
                     timeElapsed = 0
                 XMetricCoords.append((30/FPS)+timeElapsed)
 
-            coords = []
+            screenCoords = []
             XGraphCoords = []
             YGraphCoords = []
 
+            minMetX = min(XMetricCoords)
+            maxMetX = max(XMetricCoords)
+            lineSizeX = maxMetX-minMetX
+
+            minMetY = min(YMetricCoords)
+            maxMetY = max(YMetricCoords)
+            lineSizeY = maxMetY-minMetY
+
+            graphWidth = pGraph.sizeX-100
+            graphHeight = pGraph.sizeY-100
+            
+            if lineSizeX > 0:
+                WRatio = lineSizeX/graphWidth
+            else:
+                WRatio = 1
+
+            print(lineSizeY)
+
+            if lineSizeY > 0:
+                HRatio = lineSizeY/graphHeight
+            else:
+                HRatio = 1
+            
+            print(HRatio)
             for n in range(len(XMetricCoords)):
-                XGraphCoords.append(XMetricCoords[n]+originX)
-                YGraphCoords.append(-(YMetricCoords[n]/100)+originY)
+                XGraphCoords.append(XMetricCoords[n]/WRatio)
+                YGraphCoords.append(-YMetricCoords[n]/HRatio)
 
-            minX = min(XGraphCoords)-originX
-            maxX = max(XGraphCoords)-originX
-            minY = min(YGraphCoords)-originY
-            maxY = max(YGraphCoords)-originY
-
+            minGraphX = min(XGraphCoords)
+            minGraphY = min(YGraphCoords)
             for n in range(len(XGraphCoords)):
-                XGraphCoords[n] += minX
-                YGraphCoords[n] += minY
-                coords.append((XGraphCoords[n], YGraphCoords[n]))
+                screenCoords.append((XGraphCoords[n]+originX, YGraphCoords[n]+originY))
             try:
-                pygame.draw.lines(display, blue, False, coords, 2)
+                pygame.draw.lines(display, blue, False, screenCoords, 2)
             except:
                 pass
 
                        
         if bStartGraphClicked:
             started = True
-            XCoords = []
-            YCoords = []
+            XMetricCoords = []
+            YMetricCoords = []
 
 
 
