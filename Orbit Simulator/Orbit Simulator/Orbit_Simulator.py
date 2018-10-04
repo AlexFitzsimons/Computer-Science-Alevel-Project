@@ -757,20 +757,17 @@ while True:
             else:
                 WRatio = 1
 
-            print(lineSizeY)
-
             if lineSizeY > 0:
                 HRatio = lineSizeY/graphHeight
             else:
                 HRatio = 1
             
-            print(HRatio)
             for n in range(len(XMetricCoords)):
                 XGraphCoords.append(XMetricCoords[n]/WRatio)
                 YGraphCoords.append(-YMetricCoords[n]/HRatio)
 
-            minGraphX = min(XGraphCoords)
-            minGraphY = min(YGraphCoords)
+            originX -= min(XGraphCoords)
+            originY += (min(YGraphCoords)/2)
             for n in range(len(XGraphCoords)):
                 screenCoords.append((XGraphCoords[n]+originX, YGraphCoords[n]+originY))
             try:
