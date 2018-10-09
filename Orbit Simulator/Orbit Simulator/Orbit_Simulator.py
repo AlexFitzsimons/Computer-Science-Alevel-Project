@@ -764,12 +764,10 @@ while True:
             
             for n in range(len(XMetricCoords)):
                 XGraphCoords.append(XMetricCoords[n]/WRatio)
-                YGraphCoords.append(-YMetricCoords[n]/HRatio)
+                YGraphCoords.append(YMetricCoords[n]/HRatio)
 
-            originX -= min(XGraphCoords)
-            originY += (min(YGraphCoords)/2)
             for n in range(len(XGraphCoords)):
-                screenCoords.append((XGraphCoords[n]+originX, YGraphCoords[n]+originY))
+                screenCoords.append((XGraphCoords[n]+originX+abs(min(XGraphCoords)), -(YGraphCoords[n]+abs(min(XGraphCoords)))+originY))
             try:
                 pygame.draw.lines(display, blue, False, screenCoords, 2)
             except:
