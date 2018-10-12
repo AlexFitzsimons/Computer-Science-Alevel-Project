@@ -360,15 +360,14 @@ bSuvat = Button("Motion", green2, pLearn.posX+120, pLearn.posY+10, 100, 30)
 
 bX = Button("x", green, pGraph.posX+(pGraph.sizeX/2)-20, pGraph.posY+pGraph.sizeY-25, 40, 20)
 bY = Button("y", green, pGraph.posX+5, pGraph.posY+(pGraph.sizeY/2)-20, 20, 40)
-
 VX = "Velocity X (m/s)"
 bXvel = Button(VX, yellow, pGraph.posX+30, pGraph.posY+30, 200, 50)
 VY = "Velocity Y (m/s)"
 bYvel = Button(VY, yellow, pGraph.posX+30, pGraph.posY+90, 200, 50)
 T = "Time (s)"
 bTime = Button(T, yellow, pGraph.posX+30, pGraph.posY+150, 200, 50)
-
 bStartGraph = Button("Start Graphing!", red, pGraph.posX+(pGraph.sizeX/2)-80, pGraph.posY+(pGraph.sizeY/2)-15, 160, 30)
+bStopGraph = Button("Stop Graphing!", red, pGraph.posX+pGraph.sizeX-180, pGraph.posY+10, 160, 30)
 
 ##switches
 sBounce = Switch("Bounce", blue, 10, 100, False, "on", "off")#switch to turn on and off bounce
@@ -706,7 +705,7 @@ while True:
             IDButtons.append(Button(str(self.ID), orange,  pGraph.posX+300, pGraph.posY+adjust, 200, 50))
             adjust += 60
 
-        if changeXaxis:
+        if changeXaxis and not started:
             pChangeX.displayPanel()
             sbIDs.displayScrollBar()
             if clicked:
@@ -757,7 +756,7 @@ while True:
                 VarX[1] = -1
                 changeXaxis = False
 
-        if changeYaxis:
+        if changeYaxis and not started:
             pChangeY.displayPanel()
 
             colour19, bXvelClicked = bXvel.buttonClicked(clicked, X, Y)
