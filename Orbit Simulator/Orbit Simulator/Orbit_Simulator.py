@@ -65,10 +65,6 @@ InputBoxFont = pygame.font.SysFont("Consolas", 13)
 ObjectFont = pygame.font.SysFont("Consolas", 12)
 LearnFont = pygame.font.SysFont("Consolas", 24)
 
-def Positions():
-
-    return X, Y
-
 ###the class that defines the button
 class Button: 
     ##Initialisation function
@@ -154,7 +150,7 @@ defaultTimeinterval = 10000/FPS
 centerX = width/3
 centerY = height/3
 ###the class that defines the objects in the simulation
-class Object():
+class Object:
     def __init__(self, ID, colour, radius, posX, posY, velX, velY, density):
 
         self.ID = ID
@@ -206,7 +202,7 @@ class Object():
             if (self.drawPosY-self.drawRadius)<=topEdge:
                 self.velY = -self.velY
 
-class ImageObject():
+class ImageObject:
     def __init__(self, ID, type, posX, posY, velX, velY, density):
         self.ID = ID
         self.drawPosX = posX
@@ -267,6 +263,21 @@ class ImageObject():
                 self.velY = -self.velY
             if (self.drawPosY-self.drawRadius)<=topEdge:
                 self.velY = -self.velY
+
+class scrollBar:
+    def __init__(self, direction, PosX, PosY, length, requiredLength):
+        self.direction = direction
+        self.PosX = PosX
+        self.PosY = PosY
+        if self.direction == "H":
+            self.SizeX = length
+            self.SizeY = 20
+        else:
+            self.SizeX = 20
+            self.SizeY = length
+        self.innerPX = PosX+5
+        self.innerPY = PosY+5
+
 
 ###function to call for exiting the program
 def exiting(exit):
@@ -427,11 +438,14 @@ while True:
         pygame.display.update()
         FPSClock.tick(FPS)
     time.sleep(0.5)
-    
+
     for item in data:
+        if item[0] > number:
+            number = item[0]+1
         metricradius = (((3*item[1])/(4*math.pi*item[6]))**(1/3))
         Radius = metricradius/metersPerPixel
         objects.append(Object(item[0], grey1, Radius, (item[2]/metersPerPixel), (item[3]/metersPerPixel), item[4], item[5], item[6]))
+
     
     ##simulation
     zoom = False
@@ -649,6 +663,12 @@ while True:
         if bYClicked:
             changeYaxis = True
 
+        IDButtons = []
+        adjust = 30
+        for self in objects:
+            IDButtons.append(Button(str(self.ID), orange,  pGraph.posX+300, pGraph.posY+adjust, 200, 50))
+            adjust += 60
+
         if changeXaxis:
             pChangeX.displayPanel()
 
@@ -660,6 +680,16 @@ while True:
 
             colour21, bTimeClicked = bTime.buttonClicked(clicked, X, Y)
             bTime.displayButton(colour21)
+
+            for n in IDButtons:
+                colour23, IDButtonClicked = n.buttonClicked(clicked, X, Y)
+                if(VarX[0] != T):
+                    n.displayButton(colour23)
+                    if IDButtonClicked:
+                        VarX[1] = int(n.name)
+                        changeXaxis = False
+                else:
+                    n.displayButton(grey4)
 
             if bXvelClicked:
                 VarX[0] = VX
@@ -690,6 +720,17 @@ while True:
             colour21, bTimeClicked = bTime.buttonClicked(clicked, X, Y)
             bTime.displayButton(colour21)
 
+            for n in IDButtons:
+                colour23, IDButtonClicked = n.buttonClicked(clicked, X, Y)
+                if(VarY[0] != T):
+                    n.displayButton(colour23)
+                    if IDButtonClicked:
+                        VarY[1] = int(n.name)
+                        changeYaxis = False
+                else:
+                    n.displayButton(grey4)
+
+
             if bXvelClicked:
                 VarY[0] = VX
                 if VarY[1] == -1:
@@ -710,6 +751,7 @@ while True:
         colour22, bStartGraphClicked = bStartGraph.buttonClicked(clicked, X, Y)
         if not started:
             bStartGraph.displayButton(colour22)
+            timeElapsed = 0
         else:
             for self in objects:
                 if self.ID == VarX[1]:
@@ -719,23 +761,17 @@ while True:
                         XMetricCoords.append(self.velY)
                 elif self.ID == VarY[1]:
                     if VarY[0] == VX:
-                        YMetricCoords.append(self.velX)
+                        YMetricCoords.append(-self.velX)
                     elif VarY[0] == VY:
-                        YMetricCoords.append(self.velY)
+                        YMetricCoords.append(-self.velY)
 
             if VarY[0] == T:
-                try:
-                    timeElapsed = YMetricCoords[len(YMetricCoords)-1]
-                except:
-                    timeElapsed = 0
-                YMetricCoords.append((30/FPS)+timeElapsed)
+                timeElapsed += 1/FPS
+                YMetricCoords.append(-timeElapsed)
 
             if VarX[0] == T:
-                try:
-                    timeElapsed = XMetricCoords[len(XMetricCoords)-1]
-                except:
-                    timeElapsed = 0
-                XMetricCoords.append((30/FPS)+timeElapsed)
+                timeElapsed += 1/FPS
+                XMetricCoords.append(timeElapsed)
 
             screenCoords = []
             XGraphCoords = []
@@ -763,16 +799,15 @@ while True:
                 HRatio = 1
             
             for n in range(len(XMetricCoords)):
-                XGraphCoords.append(XMetricCoords[n]/WRatio)
-                YGraphCoords.append(YMetricCoords[n]/HRatio)
+                XGraphCoords.append((XMetricCoords[n]/WRatio)-(minMetX/WRatio))
+                YGraphCoords.append((YMetricCoords[n]/HRatio)-(maxMetY/HRatio))
 
             for n in range(len(XGraphCoords)):
-                screenCoords.append((XGraphCoords[n]+originX+abs(min(XGraphCoords)), -(YGraphCoords[n]+abs(min(XGraphCoords)))+originY))
+                screenCoords.append(((XGraphCoords[n]+originX), YGraphCoords[n]+originY))
             try:
                 pygame.draw.lines(display, blue, False, screenCoords, 2)
             except:
                 pass
-
                        
         if bStartGraphClicked:
             started = True
