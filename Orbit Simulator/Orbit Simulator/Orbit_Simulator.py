@@ -264,7 +264,7 @@ class ImageObject:
             if (self.drawPosY-self.drawRadius)<=topEdge:
                 self.velY = -self.velY
 
-class scrollBar:
+class ScrollBar:
     def __init__(self, direction, PosX, PosY, length, requiredLength):
         self.direction = direction
         self.PosX = PosX
@@ -272,11 +272,40 @@ class scrollBar:
         if self.direction == "H":
             self.SizeX = length
             self.SizeY = 20
+            self.innerSX = length/4
+            self.innerSY = 14
         else:
             self.SizeX = 20
             self.SizeY = length
-        self.innerPX = PosX+5
-        self.innerPY = PosY+5
+            self.innerSX = 14
+            self.innerSY = length/4
+        self.innerPX = PosX+3
+        self.innerPY = PosY+3
+
+    def displayScrollBar(self):
+        pygame.draw.rect(display, grey3, (self.PosX, self.PosY, self.SizeX, self.SizeY), 5)
+        pygame.draw.rect(display, grey1, (self.innerPX, self.innerPY, self.innerSX, self.innerSY))
+
+    def changeScroll(self, activated, X, Y):
+        if activated:
+            if self.direction == "H":
+                if (X < self.PosX+(self.innerSX/2)):
+                    self.innerPX = self.PosX+3
+
+                elif (X > self.PosX+self.SizeX-(self.innerSX/2)):
+                    self.innerPX = self.PosX+self.SizeX-self.innerSX
+
+                else:
+                    self.innerPX = X-(self.innerSX/2)
+            else:
+                if (Y < self.PosY+(self.innerSY/2)):
+                    self.innerPY = self.PosY+3
+
+                elif (Y > self.PosY+self.SizeY-(self.innerSY/2)):
+                    self.innerPY = self.PosY+self.SizeY-self.innerSY
+
+                else:
+                    self.innerPY = Y-(self.innerSY/2)
 
 
 ###function to call for exiting the program
@@ -349,21 +378,28 @@ sShowVel = Switch("Show Velocity", yellow, 10, 300, False, "on", "off")
 sShowFor = Switch("Show net Force", yellow, 10, 400, False, "on", "off")
 switches = [sBounce, sPausePlay, sShowID, sShowVel, sShowFor]
 
+##ScrollBars
+sbIDs = ScrollBar("V", pGraph.posX+pGraph.sizeX-20, pGraph.posY+5, pGraph.sizeY-10, 0)
+
 
 ##assembling the Window GUI
-def WindowGUI(clicked, X, Y):
+def WindowGUI(clicked, X, Y, clickedLastFrame):
     pygame.draw.rect(display, black, (0,0,width,32))
     pygame.draw.line(display, black, (0,0), (0, height), 2)
     pygame.draw.line(display, black, (width,0), (width, height), 2)
     pygame.draw.line(display, black, (0,height), (width, height), 18)
     pygame.Surface.blit(display, icon, (0,0))
-    colour1, bExitClicked = bExit.buttonClicked(clicked, X, Y)
-    colour2, bMinClicked = bMin.buttonClicked(clicked, X, Y)
-    bMin.displayButton(colour2)
-    bExit.displayButton(colour1)
-    exiting(bExitClicked)
-    if bMinClicked:
-        pygame.display.iconify()
+    if not clickedLastFrame:
+        colour1, bExitClicked = bExit.buttonClicked(clicked, X, Y)
+        colour2, bMinClicked = bMin.buttonClicked(clicked, X, Y)
+        bMin.displayButton(colour2)
+        bExit.displayButton(colour1)
+        exiting(bExitClicked)
+        if bMinClicked:
+            pygame.display.iconify()
+    else:
+        bMin.displayButton(grey1)
+        bExit.displayButton(red)
 
 def background():
     pygame.draw.rect(display, grey1, (0, 0, width, pSimulation.posY))
@@ -399,6 +435,7 @@ while True:
     data = []
     fileNames = os.listdir("saves\\")
     fileNames.remove("NumberOfSaves.txt")
+    activated = False
     for count, filename in enumerate(fileNames):
         buttons.append(Button(filename, grey2, (width/2)-350, (count*60)+40, 300, 50))
     while inMainMenu:
@@ -414,7 +451,7 @@ while True:
                     pygame.quit()
                     sys.exit()
         clicked = list(pygame.mouse.get_pressed())[0]
-        WindowGUI(clicked, X, Y)
+        WindowGUI(clicked, X, Y, ClickedLastFrame)
 
         if not opening:
             colour3, bEnterClicked = bEnter.buttonClicked(clicked, X, Y)
@@ -450,14 +487,14 @@ while True:
     ##simulation
     zoom = False
     changeDensity = False
-
     VarX = [T, -1]
     VarY = [VX, 0]
     changeXaxis = False
     changeYaxis = False
     started = False
     XMetricCoords = []
-    YMetricCoords = []
+    YMetricCoords = []         
+    
     while not inMainMenu:
         ##inputs
         X = list(pygame.mouse.get_pos())[0]#gets x coordinate of mouse
@@ -671,6 +708,18 @@ while True:
 
         if changeXaxis:
             pChangeX.displayPanel()
+            sbIDs.displayScrollBar()
+            if clicked:
+                if X>sbIDs.PosX and X<sbIDs.PosX+sbIDs.SizeX and Y>sbIDs.PosY and Y<sbIDs.PosY+sbIDs.SizeY:
+                    activated = True
+                elif activated:
+                    activated = True
+                else:
+                    activated = False
+            else:
+                activated = False
+
+            sbIDs.changeScroll(activated, X, Y)
 
             colour19, bXvelClicked = bXvel.buttonClicked(clicked, X, Y)
             bXvel.displayButton(colour19)
@@ -890,7 +939,7 @@ while True:
 
 
 
-        WindowGUI(clicked, X, Y)
+        WindowGUI(clicked, X, Y, ClickedLastFrame)
         colour4, bMainMenuClicked = bMainMenu.buttonClicked(clicked, X, Y)
         bMainMenu.displayButton(colour4)
 
@@ -1061,6 +1110,10 @@ while True:
                     display.blit(promptText, (width/2-100, height/2))
                 pygame.display.update()
                 FPSClock.tick(FPS)
-            time.sleep(2)
+            time.sleep(1.5)
+        if clicked:
+            ClickedLastFrame = True
+        else:
+            ClickedLastFrame = False
         pygame.display.update()
         FPSClock.tick(FPS)
