@@ -118,7 +118,7 @@ class Panel:
 ###the class that defines the switch
 class Switch:
     ##initialisation function
-    def __init__(self, name, colour, posX, posY, state, On, Off):
+    def __init__(self, name, colour, posX, posY, state, On, Off, sizeX = 46, sizeY = 24):
         self.name = name
         self.colour = colour
         self.posX = posX
@@ -127,20 +127,20 @@ class Switch:
         self.wasClicked = False
         self.On = On
         self.Off = Off
+        self.sizeX = sizeX
+        self.sizeY = sizeY
 
     ##Function to display the switch
     def displaySwitch(self):
-        pygame.draw.rect(display, grey3, (self.posX-2, self.posY-2, 86, 44))
+        pygame.draw.rect(display, grey3, (self.posX-2, self.posY-2, self.sizeX, self.sizeY))
         if not self.state:
-            pygame.draw.rect(display, self.colour, (self.posX, self.posY, 50, 40))
-            textState = self.Off
+            pygame.draw.rect(display, self.colour, (self.posX, self.posY, (self.sizeX/2)-4, (self.sizeY)-4))
             SwitchText1 = ButtonFont.render((self.Off), 1, grey1)
-            display.blit(SwitchText1, (self.posX+55, self.posY+10))
+            display.blit(SwitchText1, (self.posX+(9*len(self.name)), self.posY-25))
         else:
-            pygame.draw.rect(display, white, (self.posX+32, self.posY, 50, 40))
-            textState = self.On
+            pygame.draw.rect(display, white, (self.posX+self.sizeX/2, self.posY, (self.sizeX/2)-4, (self.sizeY)-4))
             SwitchText1 = ButtonFont.render((self.On), 1, grey1)
-            display.blit(SwitchText1, (self.posX+10, self.posY+10))
+            display.blit(SwitchText1, (self.posX+(9*len(self.name)), self.posY-25))
         SwitchText2 = ButtonFont.render((self.name + ":"), 1, grey1)
         display.blit(SwitchText2, (self.posX, self.posY-25))
 
@@ -190,17 +190,6 @@ class Object:
         self.metricPosY += (self.velY*defaultTimeinterval)
         self.drawPosX = self.metricPosX/metersPerPixel
         self.drawPosY = self.metricPosY/metersPerPixel
-
-    def bounce(self, leftEdge, topEdge, rightEdge, lowerEdge, bounce):     
-        if bounce:
-            if (self.drawPosX+self.drawRadius)>=rightEdge:
-                self.velX = -self.velX
-            if (self.drawPosX-self.drawRadius)<=leftEdge:
-                self.velX = -self.velX
-            if (self.drawPosY+self.drawRadius)>=lowerEdge:
-                self.velY = -self.velY
-            if (self.drawPosY-self.drawRadius)<=topEdge:
-                self.velY = -self.velY
 
 class ImageObject:
     def __init__(self, ID, type, posX, posY, velX, velY, density):
@@ -252,17 +241,6 @@ class ImageObject:
         self.metricPosY += (self.velY*defaultTimeinterval)
         self.drawPosX = self.metricPosX/metersPerPixel
         self.drawPosY = self.metricPosY/metersPerPixel
-
-    def bounce(self, leftEdge, topEdge, rightEdge, lowerEdge, bounce):     
-        if bounce:
-            if (self.drawPosX+self.drawRadius)>=rightEdge:
-                self.velX = -self.velX
-            if (self.drawPosX-self.drawRadius)<=leftEdge:
-                self.velX = -self.velX
-            if (self.drawPosY+self.drawRadius)>=lowerEdge:
-                self.velY = -self.velY
-            if (self.drawPosY-self.drawRadius)<=topEdge:
-                self.velY = -self.velY
 
 class ScrollBar:
     def __init__(self, direction, PosX, PosY, length, requiredLength):
@@ -355,8 +333,9 @@ bSave = Button("save", green, int((width/2)-250), int((height/2)+100), 100, 50)
 bDontSave = Button("Dont save", red, int((width/2)-50), int((height/2)+100), 100, 50)
 bCancel = Button("Cancel", grey3, int((width/2)+150), int((height/2)+100), 100, 50)
 
-bGravity = Button("Gravity", green2, pLearn.posX+225, pLearn.posY+10, 100, 30)
-bSuvat = Button("Motion", green2, pLearn.posX+120, pLearn.posY+10, 100, 30)
+bGravity = Button("Gravity", green2, pLearn.posX+110, pLearn.posY+18, 100, 30)
+bSuvat = Button("Motion", green2, pLearn.posX+5, pLearn.posY+18, 100, 30)
+bKepler = Button("Keplers 2nd law", green2, pLearn.posX+215, pLearn.posY+18, 160, 30)
 
 bX = Button("x", green, pGraph.posX+(pGraph.sizeX/2)-20, pGraph.posY+pGraph.sizeY-25, 40, 20)
 bY = Button("y", green, pGraph.posX+5, pGraph.posY+(pGraph.sizeY/2)-20, 20, 40)
@@ -367,15 +346,14 @@ bYvel = Button(VY, yellow, pGraph.posX+30, pGraph.posY+90, 200, 50)
 T = "Time (s)"
 bTime = Button(T, yellow, pGraph.posX+30, pGraph.posY+150, 200, 50)
 bStartGraph = Button("Start Graphing!", red, pGraph.posX+(pGraph.sizeX/2)-80, pGraph.posY+(pGraph.sizeY/2)-15, 160, 30)
-bStopGraph = Button("Stop Graphing!", red, pGraph.posX+pGraph.sizeX-180, pGraph.posY+10, 160, 30)
+bStopGraph = Button("Stop Graphing!", red, pGraph.posX+80, pGraph.posY+10, 160, 30)
 
 ##switches
-sBounce = Switch("Bounce", blue, 10, 100, False, "on", "off")#switch to turn on and off bounce
-sPausePlay = Switch("||/>", green, pTime.posX+5, pTime.posY+50, False, "||", " >")#switch to pause and play
-sShowID = Switch("Show ID", yellow,  10, 200, False, "on", "off")
-sShowVel = Switch("Show Velocity", yellow, 10, 300, False, "on", "off")
-sShowFor = Switch("Show net Force", yellow, 10, 400, False, "on", "off")
-switches = [sBounce, sPausePlay, sShowID, sShowVel, sShowFor]
+sPausePlay = Switch("||/>", green, pTime.posX+5, pTime.posY+50, False, "||", " >", 86, 44)#switch to pause and play
+sShowID = Switch("Show ID", yellow,  pTools.posX+5, pTools.posY+50, False, "on", "off")
+sShowVel = Switch("Show Velocity", yellow, pTools.posX+5, pTools.posY+100, False, "on", "off")
+sShowFor = Switch("Show net Force", yellow, pTools.posX+5, pTools.posY+150, False, "on", "off")
+switches = [sPausePlay, sShowID, sShowVel, sShowFor]
 
 ##ScrollBars
 sbIDs = ScrollBar("V", pGraph.posX+pGraph.sizeX-20, pGraph.posY+5, pGraph.sizeY-10, 0)
@@ -493,7 +471,8 @@ while True:
     started = False
     XMetricCoords = []
     YMetricCoords = []         
-    
+    runKepler = False
+
     while not inMainMenu:
         ##inputs
         X = list(pygame.mouse.get_pos())[0]#gets x coordinate of mouse
@@ -599,9 +578,8 @@ while True:
                 self.changePos()
             self.updateUnits()
             self.displayObject()
-            self.bounce(leftEdge, topEdge, rightEdge, lowerEdge, sBounce.state)
             if sShowVel.state:
-                pygame.draw.line(display, magenta, (int(self.drawPosX+centerX), int(self.drawPosY+centerY)), (int(self.drawPosX+(self.velX/10)+centerX), int(self.drawPosY+(self.velY/10)+centerY)))
+                pygame.draw.line(display, magenta, (int(self.drawPosX+centerX), int(self.drawPosY+centerY)), (int(self.drawPosX+(self.velX/100)+centerX), int(self.drawPosY+(self.velY/100)+centerY)))
             if sShowFor.state:
                 pygame.draw.line(display, cyan, (self.drawPosX+centerX, self.drawPosY+centerY), ((int(self.drawPosX-self.netX)+centerX), int(self.drawPosY-self.netY)+centerY), 2)
             if sShowID.state:
@@ -623,7 +601,7 @@ while True:
             elif not clicked and ClickedLastFrame:
                 ClickedLastFrame = False
                 if newRadius < 150 and newRadius > 3:
-                    objects.append(Object(number, grey1, int(newRadius), initialX-centerX, initialY-centerY, (initialX-X)*20, (initialY-Y)*20, newDensity))
+                    objects.append(Object(number, grey1, int(newRadius), initialX-centerX, initialY-centerY, (initialX-X)*100, (initialY-Y)*100, newDensity))
                     number += 1
             elif not clicked and not ClickedLastFrame:
                 ClickedLastFrame = False
@@ -795,7 +773,6 @@ while True:
                 VarY[0] = T
                 VarY[1] = -1
                 changeYaxis = False
-
         colour22, bStartGraphClicked = bStartGraph.buttonClicked(clicked, X, Y)
         if not started:
             bStartGraph.displayButton(colour22)
@@ -813,24 +790,36 @@ while True:
                     elif VarY[0] == VY:
                         YMetricCoords.append(-self.velY)
 
-            if VarY[0] == T:
-                timeElapsed += 1/FPS
-                YMetricCoords.append(-timeElapsed)
 
-            if VarX[0] == T:
-                timeElapsed += 1/FPS
-                XMetricCoords.append(timeElapsed)
 
             screenCoords = []
             XGraphCoords = []
             YGraphCoords = []
+            if not paused:
+                if VarY[0] == T:
+                    YMetricCoords.append(-timeElapsed)
+
+                if VarX[0] == T:
+                    XMetricCoords.append(timeElapsed)
 
             minMetX = min(XMetricCoords)
+            lowerX = PanelFont.render(str(round(minMetX, 1)), 1, black)
+            display.blit(lowerX, (originX, originY+30))
+
             maxMetX = max(XMetricCoords)
+            upperX = PanelFont.render(str(round(maxMetX, 1)), 1, black)
+            display.blit(upperX, (originX+pGraph.sizeX-150, originY+30))
+
             lineSizeX = maxMetX-minMetX
 
             minMetY = min(YMetricCoords)
+            upperY = PanelFont.render(str(round(-minMetY, 1)), 1, black)
+            display.blit(upperY, (originX-30, originY-pGraph.sizeX+200))
+
             maxMetY = max(YMetricCoords)
+            lowerY = PanelFont.render(str(round(-maxMetY, 1)), 1, black)
+            display.blit(lowerY, (originX-50, originY-15))
+
             lineSizeY = maxMetY-minMetY
 
             graphWidth = pGraph.sizeX-100
@@ -856,11 +845,26 @@ while True:
                 pygame.draw.lines(display, blue, False, screenCoords, 2)
             except:
                 pass
+
+            colour24, bStopGraphClicked = bStopGraph.buttonClicked(clicked, X, Y)
+            bStopGraph.displayButton(colour24)
+            if bStopGraphClicked:
+                started = False
+                area = pygame.Rect(pGraph.posX, pGraph.posY, pGraph.sizeX, pGraph.sizeY)
+                subSurface = display.subsurface(area)
+                pygame.image.save(subSurface, "savedGraph.jpg")
+
+            if VarY[0] == T:
+                timeElapsed += defaultTimeinterval
+
+            if VarX[0] == T:
+                timeElapsed += defaultTimeinterval
                        
         if bStartGraphClicked:
             started = True
             XMetricCoords = []
             YMetricCoords = []
+            timeElapsed = 0
 
 
 
@@ -871,13 +875,72 @@ while True:
         colour16, bSuvatClicked = bSuvat.buttonClicked(clicked, X, Y)
         bSuvat.displayButton(colour16)
 
+        colour25, bKeplerClicked = bKepler.buttonClicked(clicked, X, Y)
+        bKepler.displayButton(colour25)
+
         if bGravityClicked:
             display.blit(gravitationFormula, (pLearn.posX+50, pLearn.posY+50))
         elif bSuvatClicked:
             display.blit(suvatFormula, (pLearn.posX+50, pLearn.posY+50))
+        elif bKeplerClicked:
+            if len(objects) != 2:
+                learnText = LearnFont.render("There must be exactly 2 objects", 1, black)
+                learnText2 = LearnFont.render(" in the simulation for this!", 1, black)
+                display.blit(learnText, (pLearn.posX+30, pLearn.posY+150))
+                display.blit(learnText2, (pLearn.posX+30, pLearn.posY+200))
+            else:
+                if not runKepler:
+                    if (objects[0].metricMass) > (objects[1].metricMass):
+                        testObject = 1
+                        centerObject = 0
+                    else:
+                        testObject = 0
+                        centerObject = 1
+                    pointList1 = [(objects[centerObject].drawPosX+centerX, objects[centerObject].drawPosY+centerY)]
+                    pointList2 = [(objects[centerObject].drawPosX+centerX, objects[centerObject].drawPosY+centerY)]
+                    timePassed = 0
+                    runKepler = True
+                    reps = 0
         else:
-            learnText = LearnFont.render("click on the buttons above to see the formulas!", 1, black)
+            learnText = LearnFont.render("click on the buttons above to see the formulas", 1, grey3)
+            display.blit(learnText, (pLearn.posX+30, pLearn.posY+100))
+
+        if len(objects)!=2 and runKepler:
+                learnText = LearnFont.render("There must be exactly 2 objects", 1, black)
+                learnText2 = LearnFont.render(" in the simulation for this!", 1, black)
+                display.blit(learnText, (pLearn.posX+30, pLearn.posY+150))
+                display.blit(learnText2, (pLearn.posX+30, pLearn.posY+200))
+                runKepler = False
+        if runKepler:
+            learnText = LearnFont.render("A radius vector joining any two objects, sweeps", 1, black)
+            learnText2 = LearnFont.render("out equal areas in equal lengths of time.", 1, black)
+            learnText3 = LearnFont.render("green area = blue area", 1, black)
             display.blit(learnText, (pLearn.posX+30, pLearn.posY+150))
+            display.blit(learnText2, (pLearn.posX+30, pLearn.posY+200))
+            display.blit(learnText3, (pLearn.posX+30, pLearn.posY+250))
+            if timePassed < 120:
+                pointList1.append(((objects[testObject].drawPosX+centerX),(objects[testObject].drawPosY+centerY)))
+            if timePassed >240 and timePassed<360:
+                pointList2.append(((objects[testObject].drawPosX+centerX),(objects[testObject].drawPosY+centerY)))
+            if timePassed > 380:
+                timePassed = 0
+                pointList1 = [(objects[centerObject].drawPosX+centerX, objects[centerObject].drawPosY+centerY)]
+                pointList2 = [(objects[centerObject].drawPosX+centerX, objects[centerObject].drawPosY+centerY)]
+                reps += 1
+            try:
+                pygame.draw.polygon(display, blue, pointList1)
+            except:
+                pass
+            try:
+                pygame.draw.polygon(display, green, pointList2)
+            except:
+                pass
+            timePassed+=1
+            if reps > 3:
+                runKepler = False
+                pointList1 = [(objects[centerObject].drawPosX+centerX, objects[centerObject].drawPosY+centerY)]
+                pointList2 = [(objects[centerObject].drawPosX+centerX, objects[centerObject].drawPosY+centerY)]
+                reps = 0
 
 
         ##displaying the switches
@@ -953,19 +1016,15 @@ while True:
             display.blit(InsToolBar, (pInstructions.posX+5, pInstructions.posY+30))
             pygame.draw.line(display, black, (pInstructions.posX+5, pInstructions.posY+30), (pTools.posX+50, pTools.posY+10), 3)
 
-            InsBounce = PanelFont.render("a) Bounce - Toggle weather or not the objects bounce off the sides of the simulation panel", 1, black)
-            display.blit(InsBounce, (pInstructions.posX+20, pInstructions.posY+60))
-            pygame.draw.line(display, blue, (pInstructions.posX+20, pInstructions.posY+60), (sBounce.posX, sBounce.posY), 3)
-
-            InsShowID = PanelFont.render("b) Show ID - View the ID of each object", 1, black)
+            InsShowID = PanelFont.render("a) Show ID - View the ID of each object", 1, black)
             display.blit(InsShowID, (pInstructions.posX+20, pInstructions.posY+90))
             pygame.draw.line(display, yellow, (pInstructions.posX+20, pInstructions.posY+90), (sShowID.posX, sShowID.posY), 3)
 
-            InsShowVel = PanelFont.render("c) Show velocity - View the velocity of each object", 1, black)
+            InsShowVel = PanelFont.render("b) Show velocity - View the velocity of each object", 1, black)
             display.blit(InsShowVel, (pInstructions.posX+20, pInstructions.posY+120))
             pygame.draw.line(display, yellow, (pInstructions.posX+20, pInstructions.posY+120), (sShowVel.posX, sShowVel.posY), 3)
 
-            InsShowFor = PanelFont.render("d) Show net force - View the net force acting on each object", 1, black)
+            InsShowFor = PanelFont.render("c) Show net force - View the net force acting on each object", 1, black)
             display.blit(InsShowFor, (pInstructions.posX+20, pInstructions.posY+150))
             pygame.draw.line(display, yellow, (pInstructions.posX+20, pInstructions.posY+150), (sShowFor.posX, sShowFor.posY), 3)
 
