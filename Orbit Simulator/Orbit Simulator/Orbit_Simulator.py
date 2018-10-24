@@ -9,8 +9,6 @@ import pygame
 import os
 
 
-print("version 4")
-
 ###getting pygame ready
 ##initialising pygame
 pygame.init()
@@ -33,6 +31,9 @@ AsEarth = pygame.transform.scale(pygame.image.load('asian-Globe.png'), (int((2*6
 
 gravitationFormula = pygame.image.load('formulas.jpg')
 suvatFormula = pygame.image.load('suvat.jpg')
+
+colourWheel = pygame.image.load('ColourWheel.png')
+lightness = pygame.image.load('lightness.jpg')
 
 ##setting up the timing
 FPS = 120
@@ -167,7 +168,7 @@ class Object:
         self.metricPosY = metersPerPixel*self.drawPosY
         self.metricRadius = metersPerPixel*self.drawRadius
         self.metricMass = math.pi*(4/3)*(self.metricRadius**3)*self.density
-
+        self.trail = []
 
     def displayObject(self):
         pygame.draw.circle(display, self.colour, (round(self.drawPosX+centerX), round(self.drawPosY+centerY)), round(self.drawRadius))
@@ -296,6 +297,8 @@ def exiting(exit):
 
 ##panels
 pTools = Panel("Tools", grey2, 5, 34, int(width/8), int(height/2))
+colourWheel = pygame.transform.scale(colourWheel, (int(pTools.sizeX*(3/4)),int(pTools.sizeX*(3/4))))
+lightness = pygame.transform.scale(lightness, ((int(pTools.sizeX/5)-10, int(pTools.sizeX*(4/5)))))
 pInfo = Panel("Info", grey2, 5, int(pTools.posY+pTools.sizeY+2), int(width/8), int(height/2)-46)
 pSimulation = Panel("Simulation", black, int(pTools.posX+pTools.sizeX+2), 34, int(width/2), 4*height/5)
 pTime = Panel("Time", grey2, int(pTools.posX+pTools.sizeX+2), int(pSimulation.posY+pSimulation.sizeY+2), int(width/2), (height-int(pSimulation.posY+pSimulation.sizeY+12)))
@@ -351,9 +354,11 @@ bStopGraph = Button("Stop Graphing!", red, pGraph.posX+80, pGraph.posY+10, 160, 
 ##switches
 sPausePlay = Switch("||/>", green, pTime.posX+5, pTime.posY+50, False, "||", " >", 86, 44)#switch to pause and play
 sShowID = Switch("Show ID", yellow,  pTools.posX+5, pTools.posY+50, False, "on", "off")
-sShowVel = Switch("Show Velocity", yellow, pTools.posX+5, pTools.posY+100, False, "on", "off")
+sShowVel = Switch("Show velocity", yellow, pTools.posX+5, pTools.posY+100, False, "on", "off")
 sShowFor = Switch("Show net Force", yellow, pTools.posX+5, pTools.posY+150, False, "on", "off")
-switches = [sPausePlay, sShowID, sShowVel, sShowFor]
+sShowTrail = Switch("Show trail", yellow, pTools.posX+5, pTools.posY+200, False, "on", "off")
+switches = [sPausePlay, sShowID, sShowVel, sShowFor, sShowTrail]
+
 
 ##ScrollBars
 sbIDs = ScrollBar("V", pGraph.posX+pGraph.sizeX-20, pGraph.posY+5, pGraph.sizeY-10, 0)
@@ -413,6 +418,8 @@ while True:
     fileNames = os.listdir("saves\\")
     fileNames.remove("NumberOfSaves.txt")
     activated = False
+    currentHUE = [0.7, 0.7, 0.7]
+    reduce = 255
     for count, filename in enumerate(fileNames):
         buttons.append(Button(filename, grey2, (width/2)-350, (count*60)+40, 300, 50))
     while inMainMenu:
@@ -586,6 +593,12 @@ while True:
                 self.showID()
             self.netX = 0
             self.netY = 0
+            if sShowTrail.state:
+                self.trail.append((self.drawPosX+centerX, self.drawPosY+centerY))
+                if len(self.trail)>1000:
+                    del self.trail[0]
+                if len(self.trail)>1:
+                    pygame.draw.lines(display, self.colour, False, self.trail, 2)
 
         if (X-newRadius>leftEdge) and (X+newRadius<rightEdge) and (Y-newRadius>topEdge) and (Y+newRadius<lowerEdge):
             pygame.draw.circle(display, blue, (X,Y), int(newRadius), 2)
@@ -601,7 +614,7 @@ while True:
             elif not clicked and ClickedLastFrame:
                 ClickedLastFrame = False
                 if newRadius < 150 and newRadius > 3:
-                    objects.append(Object(number, grey1, int(newRadius), initialX-centerX, initialY-centerY, (initialX-X)*100, (initialY-Y)*100, newDensity))
+                    objects.append(Object(number, currentcolour, int(newRadius), initialX-centerX, initialY-centerY, (initialX-X)*100, (initialY-Y)*100, newDensity))
                     number += 1
             elif not clicked and not ClickedLastFrame:
                 ClickedLastFrame = False
@@ -952,6 +965,27 @@ while True:
                 switch.wasClicked = False
             switch.displaySwitch()
 
+        pygame.draw.rect(display, grey1, (pTools.posX+3, sShowTrail.posY+45, pTools.sizeX-8, int(pTools.sizeX*(4/5)+10)))
+        pygame.draw.rect(display, black, (pTools.posX+3, sShowTrail.posY+45, pTools.sizeX-8, int(pTools.sizeX*(4/5)+10)), 2)
+        display.blit(colourWheel, (sShowFor.posX+3, sShowTrail.posY+55))
+        display.blit(lightness, (pTools.posX+pTools.sizeX*(4/5), sShowTrail.posY+50))
+        pygame.draw.rect(display, black, (pTools.posX+pTools.sizeX*(4/5), sShowTrail.posY+50, int(pTools.sizeX/5)-10, int(pTools.sizeX*(4/5))), 2)
+
+        if X>sShowFor.posX+3 and X<(int(pTools.sizeX*(3/4)))+sShowFor.posX+3 and Y>sShowTrail.posY+55 and Y<sShowTrail.posY+55+(int(pTools.sizeX*(3/4))):
+            if clicked:
+                currentR = list(display.get_at((X, Y)))[0]/255
+                currentG = list(display.get_at((X, Y)))[1]/255
+                currentB = list(display.get_at((X, Y)))[2]/255
+                currentHUE = [currentR, currentG, currentB]
+
+        if X>pTools.posX+pTools.sizeX*(4/5) and X<pTools.posX+pTools.sizeX*(4/5)+int(pTools.sizeX/5)-10 and Y>sShowTrail.posY+50 and Y<sShowTrail.posY+50+int(pTools.sizeX*(4/5)):
+            
+            if clicked:
+                reduce = list(display.get_at((X,Y)))[0]
+        currentcolour = (int(currentHUE[0]*reduce), int(currentHUE[1]*reduce), int(currentHUE[2]*reduce))
+
+        pygame.draw.rect(display, currentcolour, (pTools.posX+5, sShowTrail.posY+55+int(pTools.sizeX*(4/5)+10), 50, 50))
+        pygame.draw.rect(display, black, (pTools.posX+5, sShowTrail.posY+55+int(pTools.sizeX*(4/5)+10), 50, 50), 2)
         paused = sPausePlay.state
 
             
