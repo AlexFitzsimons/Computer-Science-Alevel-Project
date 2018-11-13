@@ -1,45 +1,64 @@
-####physics program
+####orbit program
+#commenting format*
+#*
+####title
+###large section e.g. description of a class or large while loop
+##small section e.g descriptio  of a small for loop or if statement
+#single line description
+#*
 
+###setup
 ##importing required libraries
-import sys
-import random
-import time
-import math
-import pygame
-import os
+import sys #for exiting python
+import time #for waiting periods of time
+import math #for quickly performing mathematical functions
+import pygame #for all graphics, animation and event handling during the program
+import os #used later for listing the files in a folder
+import ctypes #see next line of code
 
+#compenstates for the adjustments made by some computers with high PDI displays that squash application displays down
+ctypes.windll.user32.SetProcessDPIAware() 
 
 ###getting pygame ready
 ##initialising pygame
 pygame.init()
+pygame.display.init()
 
 ##defining the pyagame display
-width = int(((pygame.display.Info()).current_w))#sets display width to the screen's width resolution
-height = int(((pygame.display.Info()).current_h))#sets display height to the screen's height resolution
-display = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+#sets the screensize to the resolution of the monitor used and puts the display in full screen
+display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
+#sets display width to the screen's width resolution
+width = int(((pygame.display.Info()).current_w))
+#sets display height to the screen's height resolution
+height = int(((pygame.display.Info()).current_h))
 
-
-metersPerPixel = 500000
-
+#loads the image for the icon
 icon = pygame.image.load('icon.jpg')
+#sets the program icon to the image we just loaded in 
 pygame.display.set_icon(icon)
+#re-scales the icon to fit in the corner of the page
 icon = pygame.transform.scale(icon, (30, 30))
-EAEarth = pygame.transform.scale(pygame.image.load('europe-african-Globe.png'), (int((2*6371000)/metersPerPixel), int((2*6371000)/metersPerPixel)))
-AmEarth = pygame.transform.scale(pygame.image.load('American-Globe.png'), (int((2*6371000)/metersPerPixel), int((2*6371000)/metersPerPixel)))
-AsEarth = pygame.transform.scale(pygame.image.load('asian-Globe.png'), (int((2*6371000)/metersPerPixel), int((2*6371000)/metersPerPixel)))
 
+#loads the image for the gravitation formulas used later to teach about newtons law of gravitation
 gravitationFormula = pygame.image.load('formulas.jpg')
+#loads the image for the suvat formulas used later to teach about motion
 suvatFormula = pygame.image.load('suvat.jpg')
 
+#loads the image of the colour wheel used to select object colours
 colourWheel = pygame.image.load('ColourWheel.png')
+#loads the lightness scale - also used to select object colours
 lightness = pygame.image.load('lightness.jpg')
 
 ##setting up the timing
+#sets the number of frames that pass each second to be 120
 FPS = 120
+#sets the pygame animation clock up
 FPSClock = pygame.time.Clock()
 
 ##predefining colours for later
+#the colours are defined in the following format:
+#colour = (red(0-255), green(0-255), blue(0-255))
 white = (255, 255, 255)
 grey1 = (192, 192, 192)
 grey2 = (128, 128, 128)
@@ -55,10 +74,11 @@ cyan = (0, 255, 255)
 magenta = (255, 0, 255)
 orange = (255, 128, 64)
 
-G = 6.67*(10**(-11))
-
+#tells pygame to get the font system for making text ready
 pygame.font.init()
 
+#these are the fonts I have defined. The first parameter "consolas" is the text style that I have chosen
+#the second parameter, an integer, is the font size   
 ButtonFont = pygame.font.SysFont("Consolas", 15)
 PanelFont = pygame.font.SysFont("Consolas", 16)
 SwitchFont = pygame.font.SysFont("Consolas", 14)
@@ -66,185 +86,223 @@ InputBoxFont = pygame.font.SysFont("Consolas", 13)
 ObjectFont = pygame.font.SysFont("Consolas", 12)
 LearnFont = pygame.font.SysFont("Consolas", 24)
 
-###the class that defines the button
+###the class that defines the button - a part of the user interface that allows the user to select the button by clicking.
+###When it is being clicked, the corresponding value is true, when it is not clicked it is false 
 class Button: 
-    ##Initialisation function
+    ##Initialisation method
+    #the self parameter means that variable with self. infront is unique to an individual button. The other parameters are the ones that we input to create as many buttons as we want later
     def __init__(self, name, colour, posX, posY, sizeX, sizeY):
+        #this defines the name of the button tha will be displayed
         self.name = name
+        #this defines the default colour that the button will be
         self.colour = colour
+        #this defines the position in the x axis the button will be on the screen
         self.posX = posX
+        #this defines the position in the y axis the button will be on the screen
         self.posY = posY
+        #this defines the width of the button
         self.sizeX = sizeX
+        #this defines the height of the button
         self.sizeY = sizeY
-    ##Function to display the button
+
+    ##method to display the button
+    #The newColour will change the colour of the button we use this later to indicate to the user if the mouse is on the button.
+    #self references all the variables unique to the object tha we defined earlier
     def displayButton(self, newColour):
-        pygame.draw.rect(display, newColour, ((self.posX, self.posY), (self.sizeX, self.sizeY)))#draws the main rectangular part of the button
-        ButtonText = ButtonFont.render(self.name, 1, black)#defines the text to be put on the button
-        adjustBy = len(self.name)#adjusting the position of the text on the button depending on the buttons length
+        #draws the main rectangular part of the button to the display based on the values we initialised it with and the updated values
+        pygame.draw.rect(display, newColour, ((self.posX, self.posY), (self.sizeX, self.sizeY)))
+        #defines the text and the colour of the text to be put on the button
+        ButtonText = ButtonFont.render(self.name, 1, black)
+        #adjusting the position of the text on the button depending on the buttons length
+        adjustBy = len(self.name)
+        #draws the text to the display so that it is on the button in the correct place
         display.blit(ButtonText, ((0.5*self.sizeX)+self.posX-(4*adjustBy), (0.5*self.sizeY)+self.posY-10))
     
-    ##function to detect if the mouse if over the button and if it has been clicked 
+    ##method to detect if the mouse if over the button and if it has been clicked 
+    #clicked a variable asking whether or not the left mouse button is down at this instant
+    #X is the position in the x axis on the screen of the mouse
+    #X is the position in the y axis on the screen of the mouse
+    #self references all the variables unique to the object tha we defined earlier
     def buttonClicked(self, clicked, X, Y):
+        #asks if the mouse is within the reigon of the button and the mouse button is down
         if (X >= self.posX) and (X <= (self.posX+self.sizeX)) and (Y >= self.posY) and (Y <= (self.posY+self.sizeY)) and clicked:
-            return white, True#button is clicked
+            #button is clicked so make the display colour white and set button clicked to true
+            return white, True
+        #asks if the mouse is within the reigon of the button and the mouse button is up (since if it was down it would have gone through the if statement)
         elif (X >= self.posX) and (X <= (self.posX+self.sizeX)) and (Y >= self.posY) and (Y <= (self.posY+self.sizeY)):
-            return white, False#button is not clicked but the mouse is on the button
+            #button is not clicked but the mouse is on the button so still display white but  set button clicked to false
+            return white, False
+        #if none of the previous conditions are then the mouse must not be on the button. whether or not the button is clicked is irrelevant
         else:
-            return self.colour, False#mouse not on button
+            #don't change the button colour and set button clicked to false
+            return self.colour, False
 
 ###the class that defines the panel
+###panels create different sections on the display so the user can easily know what they are interacting with.
 class Panel:
-    ##initialisation function
+    ##initialisation method
+    #self creates variables unique to each panel. The other parameters are assigned values when we create the individual panels.
     def __init__(self, type, colour, posX, posY, sizeX, sizeY):
+        #defines the name given at the top of the panel
         self.type = type
+        #defines the colour of the panel
         self.colour = colour
+        #defines the x position of the panel
         self.posX = posX
+        #defines the y position of the panel
         self.posY = posY
+        #defines the width of the panel
         self.sizeX = sizeX
+        #defines the height of the panel
         self.sizeY = sizeY
 
-    #Function to display panel
+    #method to display panel
+    #self references the variables that are unique to each panel
     def displayPanel(self):
+        #draws the rectangle with with the colours, positions and sizes we initialised them with
         pygame.draw.rect(display, self.colour, ((self.posX, self.posY), (self.sizeX, self.sizeY)))
+        #defines the text that will be displayed and its colour. 
         PanelText = PanelFont.render(self.type, 1, grey1)
-        if self.sizeX > 0:
-            invertX = 0
-        else:
-            invertX = self.sizeX
-        if self.sizeY > 0:
-            invertY = 0
-        else:
-            invertY = self.sizeY
-        display.blit(PanelText, (self.posX+4+invertX, self.posY+invertY))
-###the class that defines the switch
+        #displays the text at the top of the panel
+        display.blit(PanelText, (self.posX+4, self.posY))
+
+###the class that defines the switch - a part of the user interface that allows the user to toggle things in the program.
+###this is done by clicking the switch
 class Switch:
-    ##initialisation function
+    ##initialisation method
+    #self creates variables unique to each switch. The other parameters are assigned values when we create the individual switches.
+    #the switch has default sizes of x=46 and y=24 but can be changed before initialisation
     def __init__(self, name, colour, posX, posY, state, On, Off, sizeX = 46, sizeY = 24):
+        #defines the name of the switch
         self.name = name
+        #defines the default colour of the switch
         self.colour = colour
+        #defines the x position of the switch
         self.posX = posX
+        #defines the y position of the switch
         self.posY = posY
+        #defines the initial state of the switch
         self.state = state
-        self.wasClicked = False
+        #defines the name of the on position
         self.On = On
+        #defines the name of the off position
         self.Off = Off
+        #defines the width of the switch
         self.sizeX = sizeX
+        #defines the height of the switch
         self.sizeY = sizeY
 
-    ##Function to display the switch
+    ##method to display the switch
+    #self references the variable that are unique to each individual switch
     def displaySwitch(self):
+        #draws the rectangle that will be displayed behind the switch
         pygame.draw.rect(display, grey3, (self.posX-2, self.posY-2, self.sizeX, self.sizeY))
+        #asks if the state is false
         if not self.state:
+            #since the switch is off draw the rectangle in the default colour and the off position
             pygame.draw.rect(display, self.colour, (self.posX, self.posY, (self.sizeX/2)-4, (self.sizeY)-4))
+            #defines the text to be the name of the off position
             SwitchText1 = ButtonFont.render((self.Off), 1, grey1)
+            #displays the text of the off position
             display.blit(SwitchText1, (self.posX+(9*len(self.name)), self.posY-25))
         else:
+            #since the switch is on draw the retangle as white and in the on position
             pygame.draw.rect(display, white, (self.posX+self.sizeX/2, self.posY, (self.sizeX/2)-4, (self.sizeY)-4))
+            #defines the text to be the name of the on position
             SwitchText1 = ButtonFont.render((self.On), 1, grey1)
+            #displays the text of the on position
             display.blit(SwitchText1, (self.posX+(9*len(self.name)), self.posY-25))
+        #creates the text for the name of the switch
         SwitchText2 = ButtonFont.render((self.name + ":"), 1, grey1)
+        #displays the name text
         display.blit(SwitchText2, (self.posX, self.posY-25))
 
-###the class that defines the number input box
-
-defaultTimeinterval = 10000/FPS
+#creates an initial value for the number of metric meters in every pixel on the simulation
+metersPerPixel = 500000
+#creates an initial value for the number of simulation seconds that pass every frame 10000 simulation seconds every second is (10000/fps) simulation seconds every frame
+Timeinterval = 10000/FPS
+#defines the x position of the center of the universe created. This is the point around which you will be able to zoom in the x axis
 centerX = width/3
+#defines the y position of the center of the universe created. This is the point around which you will be able to zoom in the y axis
 centerY = height/3
-###the class that defines the objects in the simulation
-class Object:
-    def __init__(self, ID, colour, radius, posX, posY, velX, velY, density):
 
+###the class that defines the objects in the simulation - these are the planets that the user will put into the simulation
+class Object:
+    ##initialisation method
+    #self allows each object to have it's own unique variables. The other parameters are defined later when the objects are added in by the user
+    def __init__(self, ID, colour, radius, posX, posY, velX, velY, density):
+        #defines the ID of each object - used to tell the difference between objects
         self.ID = ID
+        #defines the colour of the object
         self.colour = colour
+        #defines the radius of the circle that will be drawn onto the screen
         self.drawRadius = radius
+        #defines the x position that the circle will be drawn onto
         self.drawPosX = posX
+        #defines the y position that the circle will be drawn onto
         self.drawPosY = posY
+        #defines the x velocity that the object will have
         self.velX = velX
+        #defines the y velocity that the object will have
         self.velY = velY
+        #defines the net force in the x direction. The force acting on the object will change as it interacts by gravity with other objects
         self.netX = 0
+        #defines the net force in the y direction. The force acting on the object will change as it interacts by gravity with other objects
         self.netY = 0
+        #defines the density of the object (this is mass/volume)
         self.density = density
+        #defines the x position in meters used for calculations later
         self.metricPosX = metersPerPixel*self.drawPosX
+        #defines the y position in meters used for calculations later
         self.metricPosY = metersPerPixel*self.drawPosY
+        #defines the radius of the object in meters used for calculations later
         self.metricRadius = metersPerPixel*self.drawRadius
+        #definest the mass of the object in kilograms used for calculations later
         self.metricMass = math.pi*(4/3)*(self.metricRadius**3)*self.density
+        #sets the array holding previous points the object has been to be empty
         self.trail = []
 
+    ##display method
+    #self references all variables unique to each object
     def displayObject(self):
+        #draws a circe based on the draw radius, draw positions and colour
         pygame.draw.circle(display, self.colour, (round(self.drawPosX+centerX), round(self.drawPosY+centerY)), round(self.drawRadius))
 
+    ##method to display the ID of teh object on the object
     def showID(self):
+        #creates the text of the ID that will be displayed on top of the objects
         ObjectText = ObjectFont.render(str(self.ID), 1, red)
+        #displays the ID in the position of the object
         display.blit(ObjectText, (self.drawPosX-5+centerX, self.drawPosY-5+centerY))
 
+    ##method that updates the units that were defined earlier
     def updateUnits(self):
+        #changes the metric radius based on the mass and density - this changes when objects collide 
         self.metricRadius = ((3*self.metricMass)/(4*math.pi*self.density))**(1/3)
+        #updates the draw radius to match the metric radius
         self.drawRadius = self.metricRadius/metersPerPixel
+        #updates the x draw position to match the metric x position - this changes when objects have a non-zero x velocity
         self.drawPosX = self.metricPosX/metersPerPixel
+        #updates the y draw position to match the metric y position - this changes when objects have a non-zero y velocity
         self.drawPosY = self.metricPosY/metersPerPixel
-    
-    def showSelected(self):
-        pygame.draw.circle(display, orange, (int(round(self.drawPosX+centerX)), int(round(self.drawPosY+centerY))), int(round(self.drawRadius)), 3)
 
+    ##method that 
     def changePos(self):
-        self.metricPosX += (self.velX*defaultTimeinterval)
-        self.metricPosY += (self.velY*defaultTimeinterval)
+        #changes the metric X position based on it's x velocity and the time between frames
+        self.metricPosX += (self.velX*Timeinterval)
+        #changes the metric y position based on it's y velocity and the time between frames
+        self.metricPosY += (self.velY*Timeinterval)
+        #updates the x draw position to match the metric x position - this changes when objects have a non-zero x velocity
         self.drawPosX = self.metricPosX/metersPerPixel
+        #updates the y draw position to match the metric y position - this changes when objects have a non-zero y velocity
         self.drawPosY = self.metricPosY/metersPerPixel
 
-class ImageObject:
-    def __init__(self, ID, type, posX, posY, velX, velY, density):
-        self.ID = ID
-        self.drawPosX = posX
-        self.drawPosY = posY
-        self.velX = velX
-        self.velY = velY
-        self.netX = 0
-        self.netY = 0
-        self.density = density
-        self.metricPosX = metersPerPixel*posX
-        self.metricPosY = metersPerPixel*posY
-        self.type = type
-        self.collided = False
-        if self.type == "earth":
-            OneInThree  =random.randint(1, 3)
-            if OneInThree == 1:
-                self.image = EAEarth
-            elif OneInThree == 2:
-                self.image = AmEarth
-            else:
-                self.image = AsEarth
-            self.metricRadius = 6371000
-        self.drawRadius = self.metricRadius/metersPerPixel
-        self.metricMass = math.pi*(4/3)*(self.metricRadius**3)*self.density
-
-
-    def displayObject(self):
-        if self.collided:
-            pygame.draw.circle(display, grey1, (round(self.drawPosX+centerX), round(self.drawPosY+centerY)), round(self.drawRadius))
-        else:
-            display.blit(self.image, (round(self.drawPosX+centerX-self.drawRadius), round(self.drawPosY+centerY-self.drawRadius)))
-    def showID(self):
-        ObjectText = ObjectFont.render(str(self.ID), 1, red)
-        display.blit(ObjectText, (self.drawPosX-5+centerX, self.drawPosY-5+centerY))
-
-    def updateUnits(self):
-        self.metricRadius = ((3*self.metricMass)/(4*math.pi*self.density))**(1/3)
-        self.drawRadius = self.metricRadius/metersPerPixel
-        self.drawPosX = self.metricPosX/metersPerPixel
-        self.drawPosY = self.metricPosY/metersPerPixel
-    
-    def showSelected(self):
-        pygame.draw.circle(display, orange, (int(round(self.drawPosX+centerX)), int(round(self.drawPosY+centerY))), int(round(self.drawRadius)), 3)
-
-    def changePos(self):
-        self.metricPosX += (self.velX*defaultTimeinterval)
-        self.metricPosY += (self.velY*defaultTimeinterval)
-        self.drawPosX = self.metricPosX/metersPerPixel
-        self.drawPosY = self.metricPosY/metersPerPixel
-
+###the class that defines the scroll bar - lets the user click and drag to move a slider
 class ScrollBar:
+    ##initialisation method
+    #self allows each object to have it's own unique variables. the other parameters are made when individual scroll bars are made
     def __init__(self, direction, PosX, PosY, length, requiredLength):
+        #
         self.direction = direction
         self.PosX = PosX
         self.PosY = PosY
@@ -404,13 +462,10 @@ while True:
     
     wasClicked = False
     clicked = False
-    rightClicked = False
-    wasRightClicked = False
     number = 0
     heldD=0
     heldI=0
     ClickedLastFrame = False
-    rightClickedLastFrame = False
     opening = False
     fileNames = []
     buttons = []
@@ -479,6 +534,9 @@ while True:
     XMetricCoords = []
     YMetricCoords = []         
     runKepler = False
+    stop = False
+    objectXExists=False
+    objectYExists=False
 
     while not inMainMenu:
         ##inputs
@@ -517,6 +575,9 @@ while True:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LSHIFT] and keys[pygame.K_z]:
             zoom = True
+            runKepler = False
+            sShowTrail.state = False
+            
             changeDensity = False
             centerX = X
             centerY = Y
@@ -545,14 +606,14 @@ while True:
                         y = self.metricPosY-other.metricPosY
                         distance = math.sqrt((x**2)+(y**2))
 
-                        force = G*(self.metricMass*other.metricMass)/(distance**2)
+                        force = 6.67*(10**(-11))*(self.metricMass*other.metricMass)/(distance**2)
                         acc = force/self.metricMass
 
                         self.netX = (x/distance * force)/(10**22)
                         self.netY = (y/distance * force)/(10**22)
 
-                        self.velX -= acc * (x/distance) * defaultTimeinterval
-                        self.velY -= acc * (y/distance) * defaultTimeinterval
+                        self.velX -= acc * (x/distance) * Timeinterval
+                        self.velY -= acc * (y/distance) * Timeinterval
 
                         momentumX = self.velX*self.metricMass + other.velX*other.metricMass
                         momentumY = self.velY*self.metricMass + other.velY*other.metricMass
@@ -561,7 +622,10 @@ while True:
                             combinedDensity = (self.density+other.density)/2
                             if self.metricRadius > other.metricRadius:
                                 self.metricMass += other.metricMass
-                                objects.remove(other)
+                                try:
+                                    objects.remove(other)
+                                except:
+                                    pass
                                 self.density = combinedDensity
                                 self.velX = momentumX/self.metricMass
                                 self.velY = momentumY/self.metricMass
@@ -571,7 +635,10 @@ while True:
                                     pass
                             else:
                                 other.metricMass += self.metricMass
-                                objects.remove(self)
+                                try:
+                                    objects.remove(self)
+                                except:
+                                    pass
                                 other.density = combinedDensity
                                 other.velX = momentumX/other.metricMass
                                 other.velY = momentumY/other.metricMass
@@ -593,12 +660,15 @@ while True:
                 self.showID()
             self.netX = 0
             self.netY = 0
-            if sShowTrail.state:
-                self.trail.append((self.drawPosX+centerX, self.drawPosY+centerY))
-                if len(self.trail)>1000:
-                    del self.trail[0]
-                if len(self.trail)>1:
-                    pygame.draw.lines(display, self.colour, False, self.trail, 2)
+            if not zoom:
+                if sShowTrail.state:
+                    self.trail.append((self.drawPosX+centerX, self.drawPosY+centerY))
+                    if len(self.trail)>1000:
+                        del self.trail[0]
+                    if len(self.trail)>1:
+                        pygame.draw.lines(display, self.colour, False, self.trail, 2)
+            else:
+                self.trail = []
 
         if (X-newRadius>leftEdge) and (X+newRadius<rightEdge) and (Y-newRadius>topEdge) and (Y+newRadius<lowerEdge):
             pygame.draw.circle(display, blue, (X,Y), int(newRadius), 2)
@@ -619,23 +689,15 @@ while True:
             elif not clicked and not ClickedLastFrame:
                 ClickedLastFrame = False
 
-            if rightClicked and not rightClickedLastFrame:
-                rightClickedLastFrame = True
-                initialY = Y+0
-                initialX = X+0
-            elif rightClicked and rightClickedLastFrame:
-                rightClickedLastFrame = True
-                pygame.draw.circle(display, grey1, (initialX, initialY), int(newRadius))
-                pygame.draw.line(display, green, (initialX, initialY), (X, Y), 3)
-                pygame.draw.circle(display, yellow, (X, Y), int(newRadius), 2)
-            elif not rightClicked and rightClickedLastFrame:
-                rightClickedLastFrame = False
-                if newRadius < 150 and newRadius > 3:
-                    objects.append(ImageObject(number, "earth", initialX-centerX, initialY-centerY, (initialX-X), (initialY-Y), 5500))
-                    number += 1
-            elif not rightClicked and not rightClickedLastFrame:
-                rightClickedLastFrame = False
-
+        if runKepler:
+            try:
+                pygame.draw.polygon(display, blue, pointList1)
+            except:
+                pass
+            try:
+                pygame.draw.polygon(display, green, pointList2)
+            except:
+                pass
         
 
         background()
@@ -720,6 +782,7 @@ while True:
             colour21, bTimeClicked = bTime.buttonClicked(clicked, X, Y)
             bTime.displayButton(colour21)
 
+
             for n in IDButtons:
                 colour23, IDButtonClicked = n.buttonClicked(clicked, X, Y)
                 if(VarX[0] != T):
@@ -787,92 +850,117 @@ while True:
                 VarY[1] = -1
                 changeYaxis = False
         colour22, bStartGraphClicked = bStartGraph.buttonClicked(clicked, X, Y)
-        if not started:
+        if started:
+            objectXExists=False
+            objectYExists=False
+            if objects != []:
+                for self in objects:
+                    if self.ID == VarX[1]:
+                        objectXExists = True
+                        if VarX[0] == VX:
+                            XMetricCoords.append(self.velX)
+                        elif VarX[0] == VY:
+                            XMetricCoords.append(self.velY)
+                    elif self.ID == VarY[1]:
+                        objectYExists = True
+                        if VarY[0] == VX:
+                            YMetricCoords.append(-self.velX)
+                        elif VarY[0] == VY:
+                            YMetricCoords.append(-self.velY)
+
+                screenCoords = []
+                XGraphCoords = []
+                YGraphCoords = []
+                if not paused and not stop:
+                    if VarY[0] == T:
+                        YMetricCoords.append(-timeElapsed)
+                        objectYExists = True
+                    if VarX[0] == T:
+                        XMetricCoords.append(timeElapsed)
+                        objectXExists = True
+
+                if not objectXExists or not objectYExists:
+                   stop = True
+
+                minMetX = min(XMetricCoords)
+                lowerX = PanelFont.render(str(round(minMetX, 1)), 1, black)
+                display.blit(lowerX, (originX, originY+30))
+
+                maxMetX = max(XMetricCoords)
+                upperX = PanelFont.render(str(round(maxMetX, 1)), 1, black)
+                display.blit(upperX, (originX+pGraph.sizeX-150, originY+30))
+
+                lineSizeX = maxMetX-minMetX
+
+                minMetY = min(YMetricCoords)
+                upperY = PanelFont.render(str(round(-minMetY, 1)), 1, black)
+                display.blit(upperY, (originX-30, originY-pGraph.sizeX+200))
+
+                maxMetY = max(YMetricCoords)
+                lowerY = PanelFont.render(str(round(-maxMetY, 1)), 1, black)
+                display.blit(lowerY, (originX-50, originY-15))
+
+                if objectXExists and objectYExists:
+                    lineSizeY = maxMetY-minMetY
+
+                    graphWidth = pGraph.sizeX-100
+                    graphHeight = pGraph.sizeY-100
+                
+                    if lineSizeX > 0:
+                        WRatio = lineSizeX/graphWidth
+                    else:
+                        WRatio = 1
+
+                    if lineSizeY > 0:
+                        HRatio = lineSizeY/graphHeight
+                    else:
+                        HRatio = 1
+            
+                    for n in range(len(XMetricCoords)):
+                        XGraphCoords.append((XMetricCoords[n]/WRatio)-(minMetX/WRatio))
+                        YGraphCoords.append((YMetricCoords[n]/HRatio)-(maxMetY/HRatio))
+
+                    for n in range(len(XGraphCoords)):
+                        screenCoords.append(((XGraphCoords[n]+originX), YGraphCoords[n]+originY))
+
+                    savedCoords = screenCoords
+                try:
+                    pygame.draw.lines(display, blue, False, savedCoords, 2)
+                except:
+                    pass
+
+                colour24, bStopGraphClicked = bStopGraph.buttonClicked(clicked, X, Y)
+                bStopGraph.displayButton(colour24)
+                if bStopGraphClicked:
+                    started = False
+                    stop = False
+                    area = pygame.Rect(pGraph.posX, pGraph.posY, pGraph.sizeX, pGraph.sizeY)
+                    subSurface = display.subsurface(area)
+                    pygame.image.save(subSurface, "savedGraph.jpg")
+
+                if VarY[0] == T:
+                    timeElapsed += Timeinterval
+
+                if VarX[0] == T:
+                    timeElapsed += Timeinterval
+        elif objectXExists and objectYExists:
             bStartGraph.displayButton(colour22)
             timeElapsed = 0
         else:
-            for self in objects:
-                if self.ID == VarX[1]:
-                    if VarX[0] == VX:
-                        XMetricCoords.append(self.velX)
-                    elif VarX[0] == VY:
-                        XMetricCoords.append(self.velY)
-                elif self.ID == VarY[1]:
-                    if VarY[0] == VX:
-                        YMetricCoords.append(-self.velX)
-                    elif VarY[0] == VY:
-                        YMetricCoords.append(-self.velY)
+            if objects != []:
+                for self in objects:
+                    if self.ID == VarX[1]:
+                        objectXExists = True
+                    elif self.ID == VarY[1]:
+                        objectYExists = True
 
-
-
-            screenCoords = []
-            XGraphCoords = []
-            YGraphCoords = []
-            if not paused:
-                if VarY[0] == T:
-                    YMetricCoords.append(-timeElapsed)
-
-                if VarX[0] == T:
-                    XMetricCoords.append(timeElapsed)
-
-            minMetX = min(XMetricCoords)
-            lowerX = PanelFont.render(str(round(minMetX, 1)), 1, black)
-            display.blit(lowerX, (originX, originY+30))
-
-            maxMetX = max(XMetricCoords)
-            upperX = PanelFont.render(str(round(maxMetX, 1)), 1, black)
-            display.blit(upperX, (originX+pGraph.sizeX-150, originY+30))
-
-            lineSizeX = maxMetX-minMetX
-
-            minMetY = min(YMetricCoords)
-            upperY = PanelFont.render(str(round(-minMetY, 1)), 1, black)
-            display.blit(upperY, (originX-30, originY-pGraph.sizeX+200))
-
-            maxMetY = max(YMetricCoords)
-            lowerY = PanelFont.render(str(round(-maxMetY, 1)), 1, black)
-            display.blit(lowerY, (originX-50, originY-15))
-
-            lineSizeY = maxMetY-minMetY
-
-            graphWidth = pGraph.sizeX-100
-            graphHeight = pGraph.sizeY-100
-            
-            if lineSizeX > 0:
-                WRatio = lineSizeX/graphWidth
-            else:
-                WRatio = 1
-
-            if lineSizeY > 0:
-                HRatio = lineSizeY/graphHeight
-            else:
-                HRatio = 1
-            
-            for n in range(len(XMetricCoords)):
-                XGraphCoords.append((XMetricCoords[n]/WRatio)-(minMetX/WRatio))
-                YGraphCoords.append((YMetricCoords[n]/HRatio)-(maxMetY/HRatio))
-
-            for n in range(len(XGraphCoords)):
-                screenCoords.append(((XGraphCoords[n]+originX), YGraphCoords[n]+originY))
-            try:
-                pygame.draw.lines(display, blue, False, screenCoords, 2)
-            except:
-                pass
-
-            colour24, bStopGraphClicked = bStopGraph.buttonClicked(clicked, X, Y)
-            bStopGraph.displayButton(colour24)
-            if bStopGraphClicked:
-                started = False
-                area = pygame.Rect(pGraph.posX, pGraph.posY, pGraph.sizeX, pGraph.sizeY)
-                subSurface = display.subsurface(area)
-                pygame.image.save(subSurface, "savedGraph.jpg")
-
-            if VarY[0] == T:
-                timeElapsed += defaultTimeinterval
-
-            if VarX[0] == T:
-                timeElapsed += defaultTimeinterval
-                       
+                if not paused and not stop:
+                    if VarY[0] == T:
+                        objectYExists = True
+                    if VarX[0] == T:
+                        objectXExists = True
+        print(objectXExists, objectYExists)
+                    
         if bStartGraphClicked:
             started = True
             XMetricCoords = []
@@ -940,14 +1028,7 @@ while True:
                 pointList1 = [(objects[centerObject].drawPosX+centerX, objects[centerObject].drawPosY+centerY)]
                 pointList2 = [(objects[centerObject].drawPosX+centerX, objects[centerObject].drawPosY+centerY)]
                 reps += 1
-            try:
-                pygame.draw.polygon(display, blue, pointList1)
-            except:
-                pass
-            try:
-                pygame.draw.polygon(display, green, pointList2)
-            except:
-                pass
+
             timePassed+=1
             if reps > 3:
                 runKepler = False
@@ -996,7 +1077,7 @@ while True:
         scaleLabel = PanelFont.render("Current Scale:", 1, black)
         scaleInfo = PanelFont.render("  " + str(int(metersPerPixel))+" meters per pixel", 1, black)
         timeLabel = PanelFont.render("Current speed of time:", 1, black)
-        timeInfo = PanelFont.render("  x"+str(int(round(FPS*defaultTimeinterval, 3))), 1, black)
+        timeInfo = PanelFont.render("  x"+str(int(round(FPS*Timeinterval, 3))), 1, black)
 
 
         display.blit(radiusLabel, (8, 50+int(height/2)))
@@ -1016,24 +1097,29 @@ while True:
             newDensity = 5500
             newRadius = 10
         
-        colour6, bIncreaseClicked = bIncrease.buttonClicked(clicked, X, Y)
+        if not started:
+            colour6, bIncreaseClicked = bIncrease.buttonClicked(clicked, X, Y)
+        else:
+            colour6 = grey4
+            bIncreaseClicked = False
         bIncrease.displayButton(colour6)
-        
         if bIncreaseClicked and (heldI == 0 or heldI > FPS):
-            defaultTimeinterval *= 2
+            Timeinterval *= 2
             heldI+=1
         elif not bIncreaseClicked:
             heldI=0
 
-        colour7, bDecreaseClicked = bDecrease.buttonClicked(clicked, X, Y)
+        if not started:
+            colour7, bDecreaseClicked = bDecrease.buttonClicked(clicked, X, Y)
+        else:
+            colour7 = grey4
+            bDecreaseClicked = False
         bDecrease.displayButton(colour7)
         if bDecreaseClicked and (heldD == 0 or heldD > FPS):
-            defaultTimeinterval /= 2
+            Timeinterval /= 2
             heldD+=1
         elif not bDecreaseClicked:
             heldD=0
-
-
 
         WindowGUI(clicked, X, Y, ClickedLastFrame)
         colour4, bMainMenuClicked = bMainMenu.buttonClicked(clicked, X, Y)
@@ -1133,16 +1219,6 @@ while True:
 
             Ins8 = PanelFont.render("7) Holding down shift and d will let you change the density of the next object using the scroll wheel", 1, black)
             display.blit(Ins8, (pInstructions.posX+5, pInstructions.posY+240))
-
-            Ins9 = PanelFont.render("8) Right clicking will add in the planet earth (useful for understanding the scale)", 1, black)
-            display.blit(Ins9, (pInstructions.posX+5, pInstructions.posY+270))
-
-            Ins10 = PanelFont.render("9) The planet earth will always be the same size, density and mass no matter what settings are used", 1, black)
-            display.blit(Ins10, (pInstructions.posX+5, pInstructions.posY+300))
-
-            Ins12 = PanelFont.render("10) Radius of Earth is 6,371,000m, Density of earth is 5500kg/m^3", 1, black)
-            display.blit(Ins12, (pInstructions.posX+5, pInstructions.posY+330))
-
 
         if bMainMenuClicked:
             done = False
