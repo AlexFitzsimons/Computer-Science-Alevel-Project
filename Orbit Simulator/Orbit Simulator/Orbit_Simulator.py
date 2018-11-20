@@ -1,11 +1,4 @@
-####orbit program
-#commenting format*
-#*
-####title
-###large section e.g. description of a class or large while loop
-##small section e.g descriptio  of a small for loop or if statement
-#1 to 2 line description
-#*
+####orbit programS
 
 ###setup
 ##importing required libraries
@@ -409,7 +402,7 @@ T = "Time (s)"
 #the button that changes an axis ti time
 bTime = Button(T, yellow, pGraph.posX+30, pGraph.posY+150, 200, 50)
 #the button that starts the graphing
-bStartGraph = Button("Start Graphing!", red, pGraph.posX+(pGraph.sizeX/2+120), pGraph.posY+30, 160, 30)
+bStartGraph = Button("Start Graphing!", red, pGraph.posX+(pGraph.sizeX/2+120), pGraph.posY+50, 160, 30)
 #the button that stops the graphing
 bStopGraph = Button("Stop Graphing!", red, pGraph.posX+80, pGraph.posY+10, 160, 30)
 
