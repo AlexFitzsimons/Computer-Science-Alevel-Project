@@ -256,6 +256,8 @@ class Object:
         self.metricMass = math.pi*(4/3)*(self.metricRadius**3)*self.density
         #sets the array holding previous points the object has been to be empty
         self.trail = []
+        #sets the net force to 0
+        self.netForce = 0
 
     ##display method
     #self references all variables unique to each object
@@ -399,8 +401,13 @@ VY = "Velocity Y (m/s)"
 bYvel = Button(VY, yellow, pGraph.posX+30, pGraph.posY+90, 200, 50)
 #T - not a button but is the text that will be displayed if any of the axes are Time
 T = "Time (s)"
-#the button that changes an axis ti time
+#the button that changes an axis to time
 bTime = Button(T, yellow, pGraph.posX+30, pGraph.posY+150, 200, 50)
+#F - not a button but is the text that will be disp[layed if any of the axes are force
+F = "Net Force (10^24 N)"
+#the button that changes an axis to net force
+bForce = Button(F, yellow, pGraph.posX+30, pGraph.posY+210, 200, 50)
+
 #the button that starts the graphing
 bStartGraph = Button("Start Graphing!", red, pGraph.posX+(pGraph.sizeX/2+120), pGraph.posY+50, 160, 30)
 #the button that stops the graphing
@@ -736,6 +743,7 @@ while True:
         if not paused:
             #iterates through objects - the list of planets
             for self in objects:
+                self.netForce = 0
                 #iterates through objects - a nested loop
                 for other in objects:
                     #asks if other object does not equal self object
@@ -756,6 +764,8 @@ while True:
                         #This equation finds the force acting on self object through gravity
                         #although it is equal to the force acting on other object, it is calculated when the other object is calculating it's forces when other becomes self (in the outer for loop)
                         force = 6.67*(10**(-11))*(self.metricMass*other.metricMass)/(distance**2)
+                        #adds the force to the net force attribute
+                        self.netForce += force
                         #calculating acceleration of the object from the force and the mass of the object
                         acc = force/self.metricMass
 
@@ -1017,6 +1027,11 @@ while True:
             #display button
             bTime.displayButton(colour21)
 
+            #detect mouse click on the force button
+            colour26, bForceClicked = bForce.buttonClicked(clicked, X, Y)
+            #display button
+            bForce.displayButton(colour26)
+
             #iterate through the buttons
             for n in IDButtons:
                 #detect mouse click on n button
@@ -1070,6 +1085,17 @@ while True:
                 #stop changing the x axis
                 changeXaxis = False
 
+            #is the button for Force clicked
+            if bForceClicked:
+                #set the x axis variable to net force
+                VarX[0] = F
+                #is the object of the x axis -1
+                if VarX[1] == -1:
+                    #set object of the x axis to 0
+                    VarX[1] = 0
+                changeXaxis = False
+
+
         #does the user want to change the Y axis and is the graph not started
         if changeYaxis and not started:
             #display the change y axis panel
@@ -1087,6 +1113,10 @@ while True:
             #detect click on time button
             colour21, bTimeClicked = bTime.buttonClicked(clicked, X, Y)
             bTime.displayButton(colour21)
+
+            #detect click on force button
+            colour26, bForceClicked = bForce.buttonClicked(clicked, X, Y)
+            bForce.displayButton(colour26)
 
             #iterate through the buttons
             for n in IDButtons:
@@ -1141,6 +1171,16 @@ while True:
                 #stop changing Y axis
                 changeYaxis = False
 
+            #is the button for Force clicked
+            if bForceClicked:
+                #set the y axis variable to net force
+                VarY[0] = F
+                #is the object of the y axis -1
+                if VarY[1] == -1:
+                    #set object of the y axis to 0
+                    VarY[1] = 0
+                changeYaxis = False
+
         #detects the start graphing button being clicked
         colour22, bStartGraphClicked = bStartGraph.buttonClicked(clicked, X, Y)
 
@@ -1152,33 +1192,125 @@ while True:
             objectYExists=False
             #asks is objects not empty
             if objects != []:
-                #iterates through the objects
-                for self in objects:
-                    #is the ID of the current planet the same as the one in the X axis
-                    if self.ID == VarX[1]:
-                        #Object does exist
-                        objectXExists = True
-                        #is the variable type the x velocity of an object
-                        if VarX[0] == VX:
-                            #add the objects x velocity to the metric coordinates
-                            XMetricCoords.append(self.velX)
-                        #is the variable type the y velocity of an object
-                        elif VarX[0] == VY:
-                            #add the objects y velocity to the metric coordinates
-                            XMetricCoords.append(self.velY)
-                    #is the ID of the current planet the same as the one in the Y axis
-                    elif self.ID == VarY[1]:
-                        #object does exist
-                        objectYExists = True
-                        #is the variable type the x velocity of an object
-                        if VarY[0] == VX:
-                            #add the objects x velocity to the metric coordinates
-                            #the y coordinate has to be inverted because pixel measurements start at (0,0) in the top left corner
-                            YMetricCoords.append(-self.velX)
-                        #is the variable type the y velocity of an object
-                        elif VarY[0] == VY:
-                            #add the objects y velocity to the metric coordinates
-                            YMetricCoords.append(-self.velY)
+
+
+                ##binary search - the IDs of the objects will be in order so binary search works - it is also more efficient than linear search
+                #variable that tells us if the search is finished
+                found = False
+                #if the object we are looking for exists it will always remain in the nextSearch list
+                nextSearch = objects
+                #loops untill the object is found(or untill it is found that it doesn't exist)
+                while not found:
+                    #asks if nextSearch has more than 1 object
+                    if len(nextSearch) > 1:
+                        #finding halfway point in the list
+                        index = int(len(nextSearch)/2)
+                        if VarX[1] < nextSearch[index].ID:
+                            #discards the higher section
+                            nextSearch = nextSearch[:index]
+                        #asks if the ID we are looking for is greater than the one we are looking at right now
+                        elif VarX[1] > nextSearch[index].ID:
+                            #discards the lower section
+                            nextSearch = nextSearch[index:]
+                        else:
+                            #object is found
+                            found = True
+                            #returns the index of the object in the list of objects
+                            Xindex = objects.index(nextSearch[index])
+                            #object exists
+                            objectXExists = True
+                    else:
+                        #asks if the object we are looking at is the one we are looking for
+                        if nextSearch != []:
+                            if VarX[1] == nextSearch[0].ID:
+                                #object is found
+                                found = True
+                                #returns the index of the object in the list of objects
+                                Xindex = objects.index(nextSearch[0])
+                                #object exists
+                                objectXExists = True
+                            else:
+                                #object was not found but we finished the search
+                                found = True
+                                #object cannot exist
+                                objectXExists = False
+                        else:
+                            #object was not found but we finished the search
+                            found = True
+                            #object cannot exist
+                            objectXExists = False
+
+
+                #variable that tells us if the search is finished
+                found = False
+                #if the object we are looking for exists it will always remain in the nextSearch list
+                nextSearch = objects
+                #loops untill the object is found(or untill it is found that it doesn't exist)
+                while not found:
+                    #asks if nextSearch has more than 1 object
+                    if len(nextSearch) > 1:
+                        #finding halfway point in the list
+                        index = int(len(nextSearch)/2)
+                        if VarY[1] < nextSearch[index].ID:
+                            #discards the higher section
+                            nextSearch = nextSearch[:index]
+                        #asks if the ID we are looking for is greater than the one we are looking at right now
+                        elif VarY[1] > nextSearch[index].ID:
+                            #discards the lower section
+                            nextSearch = nextSearch[index:]
+                        else:
+                            #object is found
+                            found = True
+                            #returns the index of the object in the list of objects
+                            Yindex = objects.index(nextSearch[index])
+                            #object exists
+                            objectYExists = True
+                    else:
+                        #asks if the object we are looking at is the one we are looking for
+                        if nextSearch != []:
+                            if VarY[1] == nextSearch[0].ID:
+                                #object is found
+                                found = True
+                                #returns the index of the object in the list of objects
+                                Yindex = objects.index(nextSearch[0])
+                                #object exists
+                                objectYExists = True
+                            else:
+                                #object was not found but we finished the search
+                                found = True
+                                #object cannot exist
+                                objectYExists = False
+                        else:
+                            #object was not found but we finished the search
+                            found = True
+                            #object cannot exist
+                            objectYExists = False
+
+                #asks if there is an object to be measured for the x axis
+                if objectXExists:
+                    #asks if the variable is the x velocity of the object
+                    if VarX[0] == VX:
+                        #adds the x velocity to the list of coordinates 
+                        XMetricCoords.append(objects[Xindex].velX)
+                    #asks if the variable is the y velocity of the object
+                    elif VarX[0] == VY:
+                        #adds the y velocity to the list of coordinates
+                        XMetricCoords.append(objects[Xindex].velY)
+                    #asks if the variable if the net force acting on the object
+                    elif VarX[0] == F:
+                        ##adds the net force to the list of coordinates
+                        XMetricCoords.append(objects[Xindex].netForce/(10**24))
+                #asks if there is an object to be measured for the x axis
+                if objectYExists:
+                    if VarY[0] == VX:
+                        YMetricCoords.append(-objects[Yindex].velX)
+                    elif VarY[0] == VY:
+                        YMetricCoords.append(-objects[Yindex].velY)
+                    elif VarY[0] == F:
+                        YMetricCoords.append(-objects[Yindex].netForce/(10**24))
+
+
+
 
                 #coordinates to be displayed on the screen
                 screenCoords = []
@@ -1228,7 +1360,7 @@ while True:
                     #text to be displayed at the start of the y axis
                     upperY = PanelFont.render(str(round(-minMetY, 1)), 1, black)
                     #maximum y coordinate
-                    display.blit(upperY, (originX-30, originY-pGraph.sizeX+200))
+                    display.blit(upperY, (originX-50, originY-pGraph.sizeY+100))
 
                     #maximum y coordinate
                     maxMetY = max(YMetricCoords)
