@@ -505,10 +505,7 @@ while True:
     #array - contains the data of the simulation that the user is trying to open
     data = []
     #updates filenames to include all files in the saves folder
-    fileNames = os.listdir("saves\\")
-    #removes the file that just holds the number of saves
-    fileNames.remove("NumberOfSaves.txt")
-    
+    fileNames = os.listdir("saves\\")  
     #variable - is the scroll bar clicked on
     activated = False
 
@@ -562,13 +559,24 @@ while True:
                 
             #runs method to detect button clicks on open button 
             colour11, bOpenClicked = bOpen.buttonClicked(clicked, X, Y)
-            #runs method to display button on open button
+            #runs method to display the open button
             bOpen.displayButton(colour11)
             #asks if the open button is clicked
             if bOpenClicked:
                 #changes opening to true so that we can select a file to open
                 opening = True
+
+
+            
         else:
+            #runs method to detect button clicks on the back button
+            colour27, bMainMenuClicked = bMainMenu.buttonClicked(clicked, X, Y)
+            #runs method to display the back button
+            bMainMenu.displayButton(colour27)
+            #asks if back button clicked
+            if bMainMenuClicked:
+                opening = False
+
             #iterates through buttons - the array that holds each file's button
             for item in buttons:
                 #runs the method that detects button clicks on the current button in the loop
@@ -1416,7 +1424,7 @@ while True:
                 #displays the stop graphing button
                 bStopGraph.displayButton(colour24)
                 #asks is the stop graphing button clicked
-                if bStopGraphClicked:
+                if bStopGraphClicked:                    
                     #graphing is not started
                     started = False
                     #graphing is stopped
@@ -1905,6 +1913,11 @@ while True:
             #displays the next instruction
             display.blit(Ins8, (pInstructions.posX+5, pInstructions.posY+240))
 
+            #creates the next instruction
+            Ins9 = PanelFont.render("8) Click the buttons on the graph panel to start graphing, change axis variables", 1, black)
+            #displays the next instruction
+            display.blit(Ins8, (pInstructions.posX+5, pInstructions.posY+240))
+
         #asks if the main menu button isw clicked
         if bMainMenuClicked:
             #sets done equal to false
@@ -1969,18 +1982,7 @@ while True:
                 elif bSaveClicked:
                     #sets done to true
                     done = True
-                    #opens the number of saves file into file variable to be read
-                    file = open("saves\\NumberOfSaves.txt", "r")
-                    #adds 1 to the number of saved files
-                    FileID = str(int(file.readline())+1)
-                    #names the new save as "simulation" with the corresponding simulation ID
-                    FileName = "simulation" + FileID
-                    #opens the number of saves file into file variable to be written to
-                    file = open("saves\\NumberOfSaves.txt", "w")
-                    #writes the new number of saves to the number of saves file
-                    file.write(FileID)
-                    #saves and closes the number of saves file
-                    file.close()
+                    FileName = "simulation"+str(len(fileNames)+1)
                     #creates a new file with the new file name
                     file = open("saves\\"+FileName+".txt", "w")
                     #sets data to be an empty array
